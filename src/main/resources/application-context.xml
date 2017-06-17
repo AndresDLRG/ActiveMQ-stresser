@@ -1,0 +1,53 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+
+	<!-- Properties loading -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location">
+			<value>classpath:config.properties</value>
+		</property>
+	</bean>
+
+	<!-- Configuring JMS -->
+	<bean id="jmsConnectionFactory" class="org.apache.activemq.spring.ActiveMQConnectionFactory">
+		<property name="brokerURL" value="${broker.url}" />
+		<property name="trustAllPackages" value="true" />
+		<property name="userName" value="activemq-stresser" />
+		
+	</bean>
+
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory" ref="jmsConnectionFactory" />
+		<property name="defaultDestinationName" value="${queue.to.write}" />
+		<property name="explicitQosEnabled" value="true" />
+		<property name="deliveryMode" value="1" />
+
+	</bean>
+
+	<bean id="messageSender" class="andresdlrg.activemq.stresser.jms.MessageSender">
+		<property name="jmsTemplate" ref="jmsTemplate" />
+	</bean>
+
+
+	<!-- Setting the configuration objects -->
+	<bean id="dataToSendConfiguration" class="andresdlrg.activemq.stresser.model.DataToSendConfiguration">
+		<property name="classTypeToSend" value="${class.type.to.send}" />
+		<property name="useSameObjectAlways" value="${use.same.object.always}" />
+		<property name="attributesToWrite" value="${attributes.to.write}" />
+	</bean>
+
+	<bean id="limitConfiguration" class="andresdlrg.activemq.stresser.model.LimitConfiguration">
+		<property name="maxObjectsToSend" value="${max.objects.to.send}" />
+		<property name="maxExecutionTime" value="${max.execution.time}" />
+	</bean>
+
+	<bean id="throughConfiguration" class="andresdlrg.activemq.stresser.model.ThroughputConfiguration">
+		<property name="timePeriod" value="${time.period}" />
+		<property name="instancesPerTimePeriod" value="${instances.per.time.period}" />
+	</bean>
+
+</beans>
