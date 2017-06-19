@@ -34,7 +34,6 @@ public class AppLauncher {
 		
 		Class cl = int.class;
 //		Class cl = Class.forName("int");
-		System.out.println(cl.);
 		
 		System.out.println("El programa a terminado");
 	}

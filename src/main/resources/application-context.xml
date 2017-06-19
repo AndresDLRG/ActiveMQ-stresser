@@ -14,24 +14,36 @@
 
 	<!-- Configuring JMS -->
 	<bean id="jmsConnectionFactory" class="org.apache.activemq.spring.ActiveMQConnectionFactory">
-		<property name="brokerURL" value="${broker.url}" />
-		<property name="trustAllPackages" value="true" />
-		<property name="userName" value="activemq-stresser" />
-		
+		<property name="brokerURL" value="${connection.broker.url}" />
+		<property name="clientID" value="${connection.clientID}" />
+		<property name="copyMessageOnSend" value="${connection.copyMessageOnSend}" />
+		<property name="disableTimeStampsByDefault" value="${connection.disableTimeStampsByDefault}"/>
+		<property name="maxThreadPoolSize" value="${connection.maxThreadPoolSize}" />
+		<property name="messagePrioritySupported" value="${connection.messagePrioritySupported}" />
+		<property name="optimizeAcknowledge" value="${connection.optimizeAcknowledge}" />
+		<property name="password" value="${connection.password}" />
+		<property name="producerWindowSize" value="${connection.producerWindowSize}" />
+		<property name="sendTimeout" value="${connection.sendTimeout}" />
+		<property name="statsEnabled" value="${connection.statsEnabled}" />
+		<property name="trustAllPackages" value="${connection.trustAllPackages}"/>
+		<property name="useAsyncSend" value="${connection.useAsyncSend}" />
+		<property name="useCompression" value="${connection.useCompression}" />
+		<property name="userName" value="${connection.userName}" />
 	</bean>
 
 	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
 		<property name="connectionFactory" ref="jmsConnectionFactory" />
-		<property name="defaultDestinationName" value="${queue.to.write}" />
-		<property name="explicitQosEnabled" value="true" />
-		<property name="deliveryMode" value="1" />
-
+		<property name="defaultDestinationName" value="${connection.destination}" />
+		<property name="deliveryDelay" value="${connection.deliveryDelay}" />
+		<property name="deliveryPersistent" value="${connection.deliveryPersistent}" />
+		<property name="explicitQosEnabled" value="${connection.explicitQosEnabled}" />
+		<property name="priority" value="${connection.priority}" />
+		<property name="timeToLive" value="${connection.timeToLive}" />
 	</bean>
 
 	<bean id="messageSender" class="andresdlrg.activemq.stresser.jms.MessageSender">
 		<property name="jmsTemplate" ref="jmsTemplate" />
 	</bean>
-
 
 	<!-- Setting the configuration objects -->
 	<bean id="dataToSendConfiguration" class="andresdlrg.activemq.stresser.model.DataToSendConfiguration">
@@ -45,7 +57,7 @@
 		<property name="maxExecutionTime" value="${max.execution.time}" />
 	</bean>
 
-	<bean id="throughConfiguration" class="andresdlrg.activemq.stresser.model.ThroughputConfiguration">
+	<bean id="throughputConfiguration" class="andresdlrg.activemq.stresser.model.ThroughputConfiguration">
 		<property name="timePeriod" value="${time.period}" />
 		<property name="instancesPerTimePeriod" value="${instances.per.time.period}" />
 	</bean>
