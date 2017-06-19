@@ -3,10 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>andresdlrg</groupId>
 	<artifactId>activemq-stresser</artifactId>
-	<version>RELEASE-1.0.0</version>
+	<version>1.0-ALPHA</version>
 	
 	<properties>
 		<junit.version>4.12</junit.version>
+		<springframework.version>4.3.7.RELEASE</springframework.version>
+		<activemq.version>5.14.5</activemq.version>
 		<jdk.version>1.7</jdk.version>
 	</properties>
 
@@ -23,14 +25,14 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jms</artifactId>
-			<version>4.3.7.RELEASE</version>
+			<version>${springframework.version}</version>
 		</dependency>
 		
 		<!-- ActiveMQ -->
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-all</artifactId>
-			<version>5.14.5</version>
+			<version>${activemq.version}</version>
 		</dependency>
 
 	</dependencies>
