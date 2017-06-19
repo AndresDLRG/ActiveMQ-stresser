@@ -2,17 +2,17 @@ package andresdlrg.activemq.stresser.service.impl;
 
 import andresdlrg.activemq.stresser.service.ExtraParamService;
 
-public class ArrayExtraParamServiceImpl implements ExtraParamService {
+public class ArrayExtraParamServiceImpl<T> implements ExtraParamService {
 
-	private String[] stringArray;
+	private T[] values;
 
-	public ArrayExtraParamServiceImpl(String valueString, String separator) {
-		stringArray = valueString.split(separator);
+	public ArrayExtraParamServiceImpl(T[] values) {
+		this.values = values;
 	}
 
 	@Override
 	public Object getValue() {
-		return stringArray;
+		return values;
 	}
 
 }

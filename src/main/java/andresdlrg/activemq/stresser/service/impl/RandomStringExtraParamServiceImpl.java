@@ -8,10 +8,9 @@ public class RandomStringExtraParamServiceImpl implements ExtraParamService {
 
 	private long minLength;
 	private long maxLength;
-	private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+	private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
 
 	public RandomStringExtraParamServiceImpl(long minLength, long maxLength) {
-		super();
 		this.minLength = minLength;
 		this.maxLength = maxLength;
 	}
@@ -26,7 +25,7 @@ public class RandomStringExtraParamServiceImpl implements ExtraParamService {
 		Random rnd = new Random();
 		long currentLength = (long) (rnd.nextDouble() * (maxLength - minLength) + minLength);
 		while (sb.length() < currentLength) {
-			int index = (int) (rnd.nextFloat() * CHARACTERS.length());
+			int index = rnd.nextInt(CHARACTERS.length());
 			sb.append(CHARACTERS.charAt(index));
 		}
 		return sb.toString();

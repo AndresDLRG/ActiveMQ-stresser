@@ -1,6 +1,7 @@
 package andresdlrg.activemq.stresser.model;
 
 import andresdlrg.activemq.stresser.service.ExtraParamService;
+import andresdlrg.activemq.stresser.util.AttributeExtraParamUtil;
 
 public class AttributeMapping {
 
@@ -9,36 +10,32 @@ public class AttributeMapping {
 	private String fieldValue;
 	private ExtraParamService extraParam;
 
-	public String getFieldName() {
-		return fieldName;
+	public AttributeMapping(String attributeMappingString) {
+		String[] params = attributeMappingString.split("\\|");
+
+		fieldName = params[0].trim();
+		fieldType = params[1].trim();
+		fieldValue = params[2].trim();
+
+		String extraParamString = params.length == 3 ? "" : params[3].trim();
+
+		extraParam = AttributeExtraParamUtil.generateExtraParamService(this, extraParamString);
 	}
 
-	public void setFieldName(String fieldName) {
-		this.fieldName = fieldName;
+	public String getFieldName() {
+		return fieldName;
 	}
 
 	public String getFieldType() {
 		return fieldType;
 	}
 
-	public void setFieldType(String fieldType) {
-		this.fieldType = fieldType;
-	}
-
 	public String getFieldValue() {
 		return fieldValue;
 	}
 
-	public void setFieldValue(String fieldValue) {
-		this.fieldValue = fieldValue;
-	}
-
 	public ExtraParamService getExtraParam() {
 		return extraParam;
-	}
-
-	public void setExtraParam(ExtraParamService extraParam) {
-		this.extraParam = extraParam;
 	}
 
 }
