@@ -1,13 +1,14 @@
 package andresdlrg.activemq.stresser.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class SampleClass implements Serializable{
+public class SampleClass implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private Long consecutive;
 	private String permaString;
 	private String randomString;
@@ -88,6 +89,58 @@ public class SampleClass implements Serializable{
 
 	public void setStringList(List<String> stringList) {
 		this.stringList = stringList;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("SampleClass [");
+		if (consecutive != null) {
+			builder.append("consecutive=");
+			builder.append(consecutive);
+			builder.append(", ");
+		}
+		if (permaString != null) {
+			builder.append("permaString=");
+			builder.append(permaString);
+			builder.append(", ");
+		}
+		if (randomString != null) {
+			builder.append("randomString=");
+			builder.append(randomString);
+			builder.append(", ");
+		}
+		if (permaNumber != null) {
+			builder.append("permaNumber=");
+			builder.append(permaNumber);
+			builder.append(", ");
+		}
+		if (randomNumber != null) {
+			builder.append("randomNumber=");
+			builder.append(randomNumber);
+			builder.append(", ");
+		}
+		if (permaDate != null) {
+			builder.append("permaDate=");
+			builder.append(permaDate);
+			builder.append(", ");
+		}
+		if (currentDate != null) {
+			builder.append("currentDate=");
+			builder.append(currentDate);
+			builder.append(", ");
+		}
+		if (integerArray != null) {
+			builder.append("integerArray=");
+			builder.append(Arrays.toString(integerArray));
+			builder.append(", ");
+		}
+		if (stringList != null) {
+			builder.append("stringList=");
+			builder.append(stringList);
+		}
+		builder.append("]");
+		return builder.toString();
 	}
 
 }

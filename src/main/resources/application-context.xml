@@ -34,7 +34,6 @@
 	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
 		<property name="connectionFactory" ref="jmsConnectionFactory" />
 		<property name="defaultDestinationName" value="${connection.destination}" />
-		<property name="deliveryDelay" value="${connection.deliveryDelay}" />
 		<property name="deliveryPersistent" value="${connection.deliveryPersistent}" />
 		<property name="explicitQosEnabled" value="${connection.explicitQosEnabled}" />
 		<property name="priority" value="${connection.priority}" />
@@ -60,6 +59,14 @@
 	<bean id="throughputConfiguration" class="andresdlrg.activemq.stresser.model.ThroughputConfiguration">
 		<property name="timePeriod" value="${time.period}" />
 		<property name="instancesPerTimePeriod" value="${instances.per.time.period}" />
+	</bean>
+	
+	<!-- Setting the sender -->
+	<bean id="sender" class="andresdlrg.activemq.stresser.sender.ActivemqStresserSender">
+		<property name="messageSender" ref="messageSender" />
+		<property name="limits" ref="limitConfiguration" />
+		<property name="data" ref="dataToSendConfiguration" />
+		<property name="throughput" ref="throughputConfiguration" />
 	</bean>
 
 </beans>
