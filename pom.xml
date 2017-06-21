@@ -9,7 +9,8 @@
 		<junit.version>4.12</junit.version>
 		<springframework.version>4.3.7.RELEASE</springframework.version>
 		<activemq.version>5.14.5</activemq.version>
-		<jdk.version>1.7</jdk.version>
+		<jdk.target.version>1.6</jdk.target.version>
+		<jdk.source.version>1.8</jdk.source.version>
 		<logback.version>1.2.3</logback.version>
 	</properties>
 
@@ -32,7 +33,7 @@
 		<!-- ActiveMQ -->
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-all</artifactId>
+			<artifactId>activemq-spring</artifactId>
 			<version>${activemq.version}</version>
 		</dependency>
 
@@ -44,5 +45,19 @@
 		</dependency>
 
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.6.1</version>
+				<configuration>
+					<source>${jdk.source.version}</source>
+					<target>${jdk.target.version}</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
