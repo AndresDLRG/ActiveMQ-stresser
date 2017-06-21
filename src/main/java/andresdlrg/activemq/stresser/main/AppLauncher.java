@@ -9,21 +9,20 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import andresdlrg.activemq.stresser.sender.ActivemqStresserSender;
 
 public class AppLauncher {
+	
+	private static Logger log = LoggerFactory.getLogger(AppLauncher.class);
 
 	public static void main(String[] args) throws Exception {
-		
-		Logger log = LoggerFactory.getLogger(AppLauncher.class);
+		log.info("ActiveMQ-stresser starting...");
 
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml");
 
 		ActivemqStresserSender sender = ctx.getBean("sender", ActivemqStresserSender.class);
-
 		
 		sender.startSending();
 		
-		System.out.println("El programa a terminado");
-		
 		((ConfigurableApplicationContext)ctx).close();
+		log.info("ActiveMQ-stresser closing...");
 	}
 
 }

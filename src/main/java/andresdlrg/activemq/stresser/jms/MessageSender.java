@@ -6,10 +6,14 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
 public class MessageSender {
+	
+	private static Logger log = LoggerFactory.getLogger(MessageSender.class);
 
 	private JmsTemplate jmsTemplate;
 
@@ -24,6 +28,7 @@ public class MessageSender {
 				return session.createObjectMessage(object);
 			}
 		});
+		log.debug("Object sent to activeMQ - {}", object);
 	}
 
 }

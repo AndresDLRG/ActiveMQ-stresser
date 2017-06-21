@@ -23,10 +23,13 @@
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %class{0} - %msg%n</pattern>
 		</encoder>
 	</appender>
+	
+	<logger name="org.springframework" level="warn" />
+	<logger name="org.apache" level="warn" />
 
 
-	<root level="info">
+	<root level="debug">
 		<appender-ref ref="STDOUT" />
-		<appender-ref ref="FILE" />
+<!-- 		<appender-ref ref="FILE" /> -->
 	</root>
 </configuration>

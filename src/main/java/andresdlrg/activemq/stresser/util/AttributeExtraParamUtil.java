@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import andresdlrg.activemq.stresser.exception.InvalidExtraParamException;
 import andresdlrg.activemq.stresser.exception.UnsupportedFieldTypeException;
 import andresdlrg.activemq.stresser.model.AttributeMapping;
@@ -45,37 +48,47 @@ public class AttributeExtraParamUtil {
 	private static final String FLOAT_TYPE = "float";
 	private static final String DOUBLE_TYPE = "double";
 
-	public static ExtraParamService generateExtraParamService(AttributeMapping mapping, String extraParamString) {
+	private static Logger log = LoggerFactory.getLogger(AttributeExtraParamUtil.class);
 
+	public static ExtraParamService generateExtraParamService(AttributeMapping mapping, String extraParamString) {
+		log.debug("Generating ExtraParamService for fieldName=[{}], value=[{}], fieldType=[{}], extraParamString=[{}]",
+				mapping.getFieldName(), mapping.getFieldValue(), mapping.getFieldType(), extraParamString);
 		String originalValue = mapping.getFieldValue();
 		String fieldType = mapping.getFieldType();
 
+		ExtraParamService extraParamService = null;
+
 		if (extraParamString.matches(NULL_REGEX)) {
-			return generateNullExtraParam(fieldType, originalValue);
+			extraParamService = generateNullExtraParam(fieldType, originalValue);
 		} else if (extraParamString.matches(DIRECT_REGEX)) {
-			return generateDirectObjectExtraParam(fieldType, originalValue);
+			extraParamService = generateDirectObjectExtraParam(fieldType, originalValue);
 		} else if (extraParamString.matches(CONSECUTIVE_NUMBER_REGEX)) {
-			return generateConsecutiveNumberExtraParam(fieldType, extractArguments(extraParamString));
+			extraParamService = generateConsecutiveNumberExtraParam(fieldType, extractArguments(extraParamString));
 		} else if (extraParamString.matches(RANDOM_NUMBER_REGEX)) {
-			return generateRandomNumberExtraParam(fieldType, extractArguments(extraParamString));
+			extraParamService = generateRandomNumberExtraParam(fieldType, extractArguments(extraParamString));
 		} else if (extraParamString.matches(RANDOM_STRING_REGEX)) {
-			return generateRandomStringExtraParam(extractArguments(extraParamString));
+			extraParamService = generateRandomStringExtraParam(extractArguments(extraParamString));
 		} else if (extraParamString.matches(RANDOM_STRING_LIST_REGEX)) {
-			return generateRandomStringFromListExtraParam(extractArguments(extraParamString));
+			extraParamService = generateRandomStringFromListExtraParam(extractArguments(extraParamString));
 		} else if (extraParamString.matches(CURRENT_DATE_REGEX)) {
-			return generateCurrentDateExtraParam();
+			extraParamService = generateCurrentDateExtraParam();
 		} else if (extraParamString.matches(DEFINE_DATE_FORMAT_REGEX)) {
-			return generateDefineDateFormatExtraParam(originalValue, extractArguments(extraParamString));
+			extraParamService = generateDefineDateFormatExtraParam(originalValue, extractArguments(extraParamString));
 		} else if (extraParamString.matches(ARRAY_REGEX)) {
 			String simple = extraParamString.substring(extraParamString.indexOf('(') + 1,
 					extraParamString.indexOf(')'));
-			return generateArrayExtraParam(fieldType, originalValue, simple);
+			extraParamService = generateArrayExtraParam(fieldType, originalValue, simple);
 		} else if (extraParamString.matches(LIST_REGEX)) {
 			String simple = extraParamString.substring(extraParamString.indexOf('(') + 1,
 					extraParamString.indexOf(')'));
-			return generateListExtraParam(fieldType, originalValue, simple);
+			extraParamService = generateListExtraParam(fieldType, originalValue, simple);
 		}
-		throw new InvalidExtraParamException();
+		if (extraParamService != null) {
+			log.debug("ExtraParamService of class [{}] generated", extraParamService.getClass().getSimpleName());
+			return extraParamService;
+		} else {
+			throw new InvalidExtraParamException();
+		}
 	}
 
 	private static String[] extractArguments(String extraParamString) {
