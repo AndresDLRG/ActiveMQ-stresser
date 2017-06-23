@@ -3,7 +3,6 @@ package andresdlrg.activemq.stresser.model;
 public class DataToSendConfiguration {
 
 	private String classTypeToSend;
-	private boolean useSameObjectAlways;
 	private String attributesToWrite;
 
 	public String getClassTypeToSend() {
@@ -12,14 +11,6 @@ public class DataToSendConfiguration {
 
 	public void setClassTypeToSend(String classTypeToSend) {
 		this.classTypeToSend = classTypeToSend;
-	}
-
-	public boolean isUseSameObjectAlways() {
-		return useSameObjectAlways;
-	}
-
-	public void setUseSameObjectAlways(boolean useSameObjectAlways) {
-		this.useSameObjectAlways = useSameObjectAlways;
 	}
 
 	public String getAttributesToWrite() {

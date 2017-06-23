@@ -47,7 +47,6 @@
 	<!-- Setting the configuration objects -->
 	<bean id="dataToSendConfiguration" class="andresdlrg.activemq.stresser.model.DataToSendConfiguration">
 		<property name="classTypeToSend" value="${class.type.to.send}" />
-		<property name="useSameObjectAlways" value="${use.same.object.always}" />
 		<property name="attributesToWrite" value="${attributes.to.write}" />
 	</bean>
 
@@ -59,6 +58,7 @@
 	<bean id="throughputConfiguration" class="andresdlrg.activemq.stresser.model.ThroughputConfiguration">
 		<property name="timePeriod" value="${time.period}" />
 		<property name="instancesPerTimePeriod" value="${instances.per.time.period}" />
+		<property name="firstDelayMillis" value="${first.delay.millis}" />
 	</bean>
 	
 	<!-- Setting the sender -->
