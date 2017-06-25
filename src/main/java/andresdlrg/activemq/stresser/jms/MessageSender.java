@@ -30,5 +30,9 @@ public class MessageSender {
 		});
 		log.debug("Object sent to activeMQ - {}", object);
 	}
+	
+	public void init() throws JMSException {
+		jmsTemplate.getConnectionFactory().createConnection().createSession(false, Session.AUTO_ACKNOWLEDGE);
+	}
 
 }

@@ -1,9 +1,10 @@
 package andresdlrg.activemq.stresser.sender;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import andresdlrg.activemq.stresser.model.DataToSendConfiguration;
 import andresdlrg.activemq.stresser.model.LimitConfiguration;
 import andresdlrg.activemq.stresser.model.ThroughputConfiguration;
 import andresdlrg.activemq.stresser.util.AttributeMappingConverter;
+import andresdlrg.activemq.stresser.util.ReflectionUtil;
 
 public class ActivemqStresserSender {
 
@@ -26,75 +28,91 @@ public class ActivemqStresserSender {
 
 	private long count = 0;
 	private long initialTime = 0;
-	private long millisBetweenSent = 0;
-	
-	private static final long MILLIS_IN_HOUR = 3_600_00;
-	private static final long MILLIS_IN_MINUTE = 60_000;
-	private static final long MILLIS_IN_SECOND = 1_000;
+	private long nanosBetweenSent = 0;
+	private static final long NANOS_IN_HOUR = 3_600_000_000_000L;
+	private static final long NANOS_IN_MINUTE = 60_000_000_000L;
+	private static final long NANOS_IN_SECOND = 1_000_000_000L;
 
 	public void startSending() throws Exception {
 
-		if ("h".equals(throughput.getTimePeriod())) {
-			millisBetweenSent = MILLIS_IN_HOUR / throughput.getInstancesPerTimePeriod();
-		} else if ("m".equals(throughput.getTimePeriod())) {
-			millisBetweenSent = MILLIS_IN_MINUTE / throughput.getInstancesPerTimePeriod();
-		} else if ("s".equals(throughput.getTimePeriod())) {
-			millisBetweenSent = MILLIS_IN_SECOND / throughput.getInstancesPerTimePeriod();
+		if ("h".equalsIgnoreCase(throughput.getTimePeriod())) {
+			nanosBetweenSent = NANOS_IN_HOUR / throughput.getInstancesPerTimePeriod();
+		} else if ("m".equalsIgnoreCase(throughput.getTimePeriod())) {
+			nanosBetweenSent = NANOS_IN_MINUTE / throughput.getInstancesPerTimePeriod();
+		} else if ("s".equalsIgnoreCase(throughput.getTimePeriod())) {
+			nanosBetweenSent = NANOS_IN_SECOND / throughput.getInstancesPerTimePeriod();
 		} else {
 			throw new Exception();
 		}
-		
+
 		Class<?> classHandle = Class.forName(data.getClassTypeToSend());
 		log.info("The class to send is {}", classHandle.getName());
 		List<AttributeMapping> mappings = AttributeMappingConverter
 				.stringToAttributesMapping(data.getAttributesToWrite());
-		
+		log.info("nanosBetweenSent = {}", nanosBetweenSent);
 		log.info("Delaying start by {} milliseconds", throughput.getFirstDelayMillis());
 		// start delaying
 		Thread.sleep(throughput.getFirstDelayMillis());
-		
+
 		initialTime = System.currentTimeMillis();
-		log.info("Sending start Time = [{}]", new Date(initialTime));
+		log.info("Sending start Time = [{}]", dateToHumanReadable(new Date()));
 
 		// check limits
+		long initCreatingTime;
+		long processedTime;
+		int nanosToSleep;
+		long millisToSleep;
+		Object object;
 		while (count < limits.getMaxObjectsToSend()
 				&& System.currentTimeMillis() - initialTime < limits.getMaxExecutionTime()) {
-			long initCreatingTime = System.currentTimeMillis();
+			initCreatingTime = System.nanoTime();
+
 			// Generating the object to send
-			Object object = classHandle.newInstance();
+			object = classHandle.newInstance();
 			for (AttributeMapping att : mappings) {
-				Field field = classHandle.getDeclaredField(att.getFieldName());
-				field.setAccessible(true);
-				field.set(object, att.getExtraParam().getValue());
+				ReflectionUtil.set(object, att.getFieldName(), att.getExtraParam().getValue());
 			}
 
-			log.debug(object.toString());
 			messageSender.sendObject((Serializable) object);
 			count++;
-			log.info("Object [{}] sent", count);
-			log.debug("Object sent = [{}]", object);
-			long processedTime = System.currentTimeMillis() - initCreatingTime;
+			log.info("Objects sent [{}]", count);
+			processedTime = System.nanoTime() - initCreatingTime;
 
-			long timeToSleep = millisBetweenSent - processedTime;
-			if (timeToSleep < 0) {
-				timeToSleep = 0;
-			}
-			Thread.sleep(timeToSleep);
+			nanosToSleep = (int) (nanosBetweenSent - processedTime);
+			nanosToSleep = nanosToSleep < 0 ? 0 : nanosToSleep;
+			millisToSleep = TimeUnit.NANOSECONDS.toMillis(nanosToSleep);
+			nanosToSleep = nanosToSleep % 1_000_000;
+
+			Thread.sleep(millisToSleep, nanosToSleep);
 		}
 		if (count >= limits.getMaxObjectsToSend()) {
 			log.info("Max objects to send ({}) reached", limits.getMaxObjectsToSend());
 		} else {
-			log.info("Max execution time ({}ms)reached", limits.getMaxExecutionTime());
+			log.info("Max execution time ({}ms) reached", limits.getMaxExecutionTime());
 		}
-		
-		log.info("Sending end Time = [{}]", new Date());
+		log.info("Sending end Time = [{}]", dateToHumanReadable(new Date()));
+		log.info("{} objects sent in {} ", count, millisToTimeHumanReadable(System.currentTimeMillis() - initialTime));
 		reset();
 	}
 
 	private void reset() {
 		count = 0;
 		initialTime = 0;
-		millisBetweenSent = 0;
+		nanosBetweenSent = 0;
+	}
+
+	private String millisToTimeHumanReadable(long millis) {
+		long hours = TimeUnit.MILLISECONDS.toHours(millis);
+		long minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % 60;
+		long seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % 60;
+		long millis2 = millis % 1_000;
+
+		return String.format("%dh %dm %ds %dms", hours, minutes, seconds, millis2);
+	}
+
+	private String dateToHumanReadable(Date date) {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyy HH:mm:ss SSS");
+		return sdf.format(date);
 	}
 
 	public void setMessageSender(MessageSender messageSender) {

@@ -23,6 +23,7 @@ public class AppLauncher {
 		
 		((ConfigurableApplicationContext)ctx).close();
 		log.info("ActiveMQ-stresser closing...");
+		System.exit(1);
 	}
 
 }

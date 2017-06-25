@@ -30,9 +30,20 @@
 		<property name="useCompression" value="${connection.useCompression}" />
 		<property name="userName" value="${connection.userName}" />
 	</bean>
+	
+	<bean id="pooledJmsonnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+		<property name="connectionFactory" ref="jmsConnectionFactory" />
+		<property name="createConnectionOnStartup" value="true" />
+		<property name="expiryTimeout" value="0" />
+		<property name="idleTimeout" value="30000" />
+		<property name="maxConnections" value="1" />
+		<property name="maximumActiveSessionPerConnection" value="500" />
+		<property name="reconnectOnException" value="true" />
+		<property name="useAnonymousProducers" value="true" />
+	</bean>
 
 	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-		<property name="connectionFactory" ref="jmsConnectionFactory" />
+		<property name="connectionFactory" ref="pooledJmsonnectionFactory" />
 		<property name="defaultDestinationName" value="${connection.destination}" />
 		<property name="deliveryPersistent" value="${connection.deliveryPersistent}" />
 		<property name="explicitQosEnabled" value="${connection.explicitQosEnabled}" />
@@ -40,7 +51,7 @@
 		<property name="timeToLive" value="${connection.timeToLive}" />
 	</bean>
 
-	<bean id="messageSender" class="andresdlrg.activemq.stresser.jms.MessageSender">
+	<bean id="messageSender" class="andresdlrg.activemq.stresser.jms.MessageSender" init-method="init">
 		<property name="jmsTemplate" ref="jmsTemplate" />
 	</bean>
 
