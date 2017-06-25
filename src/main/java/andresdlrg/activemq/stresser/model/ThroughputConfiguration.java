@@ -2,31 +2,31 @@ package andresdlrg.activemq.stresser.model;
 
 public class ThroughputConfiguration {
 
-	private long firstDelayMillis;
-	private char timePeriod;
-	private long instancesPerTimePeriod;
+	private Long firstDelayMillis;
+	private Character timePeriod;
+	private Long instancesPerTimePeriod;
 
-	public long getFirstDelayMillis() {
+	public Long getFirstDelayMillis() {
 		return firstDelayMillis;
 	}
 
-	public void setFirstDelayMillis(long firstDelayMillis) {
+	public void setFirstDelayMillis(Long firstDelayMillis) {
 		this.firstDelayMillis = firstDelayMillis;
 	}
 
-	public char getTimePeriod() {
+	public Character getTimePeriod() {
 		return timePeriod;
 	}
 
-	public void setTimePeriod(char timePeriod) {
+	public void setTimePeriod(Character timePeriod) {
 		this.timePeriod = timePeriod;
 	}
 
-	public long getInstancesPerTimePeriod() {
+	public Long getInstancesPerTimePeriod() {
 		return instancesPerTimePeriod;
 	}
 
-	public void setInstancesPerTimePeriod(long instancesPerTimePeriod) {
+	public void setInstancesPerTimePeriod(Long instancesPerTimePeriod) {
 		this.instancesPerTimePeriod = instancesPerTimePeriod;
 	}
 
