@@ -16,7 +16,7 @@ public class SampleClass implements Serializable {
 	private Integer randomNumber;
 	private Date permaDate;
 	private Date currentDate;
-	private int[] integerArray;
+	private Integer[] integerArray;
 	private List<String> stringList;
 
 	public Long getConsecutive() {
@@ -75,11 +75,11 @@ public class SampleClass implements Serializable {
 		this.currentDate = currentDate;
 	}
 
-	public int[] getIntegerArray() {
+	public Integer[] getIntegerArray() {
 		return integerArray;
 	}
 
-	public void setIntegerArray(int[] integerArray) {
+	public void setIntegerArray(Integer[] integerArray) {
 		this.integerArray = integerArray;
 	}
 
