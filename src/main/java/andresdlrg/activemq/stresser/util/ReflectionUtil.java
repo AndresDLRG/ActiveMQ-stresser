@@ -20,11 +20,4 @@ public class ReflectionUtil {
 		field.set(object, fieldValue);
 	}
 
-	public static Object createObjectFromClassname(String className)
-			throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-		Class<?> clz = Class.forName(className);
-		log.debug("Generating instance of class {} using default constructor", className);
-		return clz.newInstance();
-	}
-
 }
