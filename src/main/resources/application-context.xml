@@ -33,13 +33,12 @@
 	
 	<bean id="pooledJmsonnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
 		<property name="connectionFactory" ref="jmsConnectionFactory" />
-		<property name="createConnectionOnStartup" value="true" />
-		<property name="expiryTimeout" value="0" />
-		<property name="idleTimeout" value="30000" />
-		<property name="maxConnections" value="1" />
-		<property name="maximumActiveSessionPerConnection" value="500" />
-		<property name="reconnectOnException" value="true" />
-		<property name="useAnonymousProducers" value="true" />
+		<property name="createConnectionOnStartup" value="${pooled.connection.createConnectionOnStartup}" />
+		<property name="expiryTimeout" value="${pooled.connection.expiryTimeout}" />
+		<property name="idleTimeout" value="${pooled.connection.idleTimeout}" />
+		<property name="maximumActiveSessionPerConnection" value="${pooled.connection.maximumActiveSessionPerConnection}" />
+		<property name="reconnectOnException" value="${pooled.connection.reconnectOnException}" />
+		<property name="useAnonymousProducers" value="${pooled.connection.useAnonymousProducers}" />
 	</bean>
 
 	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
