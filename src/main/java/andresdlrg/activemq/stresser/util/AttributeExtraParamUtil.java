@@ -1,6 +1,5 @@
 package andresdlrg.activemq.stresser.util;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,6 +49,9 @@ public class AttributeExtraParamUtil {
 
 	private static Logger log = LoggerFactory.getLogger(AttributeExtraParamUtil.class);
 
+	private AttributeExtraParamUtil() {
+	}
+
 	public static ExtraParamService generateExtraParamService(AttributeMapping mapping, String extraParamString) {
 		log.debug("Generating ExtraParamService for fieldName=[{}], value=[{}], fieldType=[{}], extraParamString=[{}]",
 				mapping.getFieldName(), mapping.getFieldValue(), mapping.getFieldType(), extraParamString);
@@ -59,7 +61,7 @@ public class AttributeExtraParamUtil {
 		ExtraParamService extraParamService = null;
 
 		if (extraParamString.matches(NULL_REGEX)) {
-			extraParamService = generateNullExtraParam(fieldType, originalValue);
+			extraParamService = generateNullExtraParam();
 		} else if (extraParamString.matches(DIRECT_REGEX)) {
 			extraParamService = generateDirectObjectExtraParam(fieldType, originalValue);
 		} else if (extraParamString.matches(CONSECUTIVE_NUMBER_REGEX)) {
@@ -84,10 +86,11 @@ public class AttributeExtraParamUtil {
 			extraParamService = generateListExtraParam(fieldType, originalValue, simple);
 		}
 		if (extraParamService != null) {
-			log.debug("ExtraParamService of class [{}] generated", extraParamService.getClass().getSimpleName());
+			log.info("ExtraParamService of class [{}] generated for fieldName [{}]",
+					extraParamService.getClass().getSimpleName(), mapping.getFieldName());
 			return extraParamService;
 		} else {
-			throw new InvalidExtraParamException();
+			throw new InvalidExtraParamException("[" + extraParamString + "] is not a valid extraParam");
 		}
 	}
 
@@ -97,7 +100,7 @@ public class AttributeExtraParamUtil {
 		return simple.split(",");
 	}
 
-	private static NullExtraParamServiceImpl generateNullExtraParam(String fieldType, String originalValue) {
+	private static NullExtraParamServiceImpl generateNullExtraParam() {
 		return new NullExtraParamServiceImpl();
 	}
 
@@ -122,7 +125,7 @@ public class AttributeExtraParamUtil {
 		} else if (DOUBLE_TYPE.equalsIgnoreCase(fieldType)) {
 			return new DirectObjectExtraParamServiceImpl<>(Double.valueOf(originalValue));
 		}
-		throw new UnsupportedFieldTypeException();
+		throw new UnsupportedFieldTypeException("[" + fieldType + "] fieldType is not supported");
 	}
 
 	private static ConsecutiveNumberExtraParamServiceImpl<Number> generateConsecutiveNumberExtraParam(String fieldType,
@@ -142,7 +145,7 @@ public class AttributeExtraParamUtil {
 		} else if (LONG_TYPE.equalsIgnoreCase(fieldType)) {
 			return new ConsecutiveNumberExtraParamServiceImpl<>(Long.valueOf(args[0]), toAdd);
 		}
-		throw new UnsupportedFieldTypeException();
+		throw new UnsupportedFieldTypeException("[" + fieldType + "] fieldType is not supported");
 	}
 
 	private static RandomNumberExtraParamServiceImpl<Number> generateRandomNumberExtraParam(String fieldType,
@@ -161,7 +164,7 @@ public class AttributeExtraParamUtil {
 		} else if (DOUBLE_TYPE.equalsIgnoreCase(fieldType)) {
 			return new RandomNumberExtraParamServiceImpl<>(Double.valueOf(args[0]), Double.valueOf(args[0]));
 		}
-		throw new UnsupportedFieldTypeException();
+		throw new UnsupportedFieldTypeException("[" + fieldType + "] fieldType is not supported");
 	}
 
 	private static RandomStringExtraParamServiceImpl generateRandomStringExtraParam(String[] args) {
@@ -178,11 +181,7 @@ public class AttributeExtraParamUtil {
 
 	private static DefineDateFormatExtraParamServiceImpl generateDefineDateFormatExtraParam(String originalValue,
 			String[] args) {
-		try {
-			return new DefineDateFormatExtraParamServiceImpl(args[0], originalValue);
-		} catch (ParseException e) {
-			return null;
-		}
+		return new DefineDateFormatExtraParamServiceImpl(args[0], originalValue);
 	}
 
 	private static ArrayExtraParamServiceImpl<?> generateArrayExtraParam(String fieldType, String originalValue,
@@ -239,7 +238,7 @@ public class AttributeExtraParamUtil {
 			}
 			return new ArrayExtraParamServiceImpl<>(doubles);
 		}
-		throw new UnsupportedFieldTypeException();
+		throw new UnsupportedFieldTypeException("[" + fieldType + "] fieldType is not supported");
 	}
 
 	private static ListExtraParamServiceImpl<?> generateListExtraParam(String fieldType, String originalValue,
@@ -297,7 +296,7 @@ public class AttributeExtraParamUtil {
 			}
 			return new ListExtraParamServiceImpl<>(doubles);
 		}
-		throw new UnsupportedFieldTypeException();
+		throw new UnsupportedFieldTypeException("[" + fieldType + "] fieldType is not supported");
 	}
 
 }

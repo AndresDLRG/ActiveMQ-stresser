@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import andresdlrg.activemq.stresser.exception.InvalidTimePeriod;
 import andresdlrg.activemq.stresser.jms.MessageSender;
 import andresdlrg.activemq.stresser.model.AttributeMapping;
 import andresdlrg.activemq.stresser.model.DataToSendConfiguration;
@@ -32,37 +33,44 @@ public class ActivemqStresserSender {
 	private static final long NANOS_IN_HOUR = 3_600_000_000_000L;
 	private static final long NANOS_IN_MINUTE = 60_000_000_000L;
 	private static final long NANOS_IN_SECOND = 1_000_000_000L;
+	private static final int NANOS_IN_MILLI = 1_000_000;
 
 	public void startSending() throws Exception {
+		StringBuilder targetSpeed = new StringBuilder();
+		targetSpeed.append("Target speed = ").append(throughput.getTimePeriod());
 
 		if ("h".equalsIgnoreCase(throughput.getTimePeriod())) {
 			nanosBetweenSent = NANOS_IN_HOUR / throughput.getInstancesPerTimePeriod();
+			targetSpeed.append(" instances per hour");
 		} else if ("m".equalsIgnoreCase(throughput.getTimePeriod())) {
 			nanosBetweenSent = NANOS_IN_MINUTE / throughput.getInstancesPerTimePeriod();
+			targetSpeed.append(" instances per minute");
 		} else if ("s".equalsIgnoreCase(throughput.getTimePeriod())) {
 			nanosBetweenSent = NANOS_IN_SECOND / throughput.getInstancesPerTimePeriod();
+			targetSpeed.append(" instances per second");
 		} else {
-			throw new Exception();
+			throw new InvalidTimePeriod("timePeriod [" + throughput.getTimePeriod() + "] is not supported");
 		}
 
 		Class<?> classHandle = Class.forName(data.getClassTypeToSend());
 		log.info("The class to send is {}", classHandle.getName());
 		List<AttributeMapping> mappings = AttributeMappingConverter
 				.stringToAttributesMapping(data.getAttributesToWrite());
+		log.info(targetSpeed.toString());
 		log.info("nanosBetweenSent = {}", nanosBetweenSent);
 		log.info("Delaying start by {} milliseconds", throughput.getFirstDelayMillis());
 		// start delaying
 		Thread.sleep(throughput.getFirstDelayMillis());
 
 		initialTime = System.currentTimeMillis();
-		log.info("Sending start Time = [{}]", dateToHumanReadable(new Date()));
+		log.info("Sending start Time = [{}]", dateToHumanReadable(new Date(initialTime)));
 
-		// check limits
 		long initCreatingTime;
 		long processedTime;
 		int nanosToSleep;
 		long millisToSleep;
 		Object object;
+		// check limits
 		while (count < limits.getMaxObjectsToSend()
 				&& System.currentTimeMillis() - initialTime < limits.getMaxExecutionTime()) {
 			initCreatingTime = System.nanoTime();
@@ -81,7 +89,7 @@ public class ActivemqStresserSender {
 			nanosToSleep = (int) (nanosBetweenSent - processedTime);
 			nanosToSleep = nanosToSleep < 0 ? 0 : nanosToSleep;
 			millisToSleep = TimeUnit.NANOSECONDS.toMillis(nanosToSleep);
-			nanosToSleep = nanosToSleep % 1_000_000;
+			nanosToSleep = nanosToSleep % NANOS_IN_MILLI;
 
 			Thread.sleep(millisToSleep, nanosToSleep);
 		}
@@ -90,7 +98,9 @@ public class ActivemqStresserSender {
 		} else {
 			log.info("Max execution time ({}ms) reached", limits.getMaxExecutionTime());
 		}
+		log.info("Sending start Time = [{}]", dateToHumanReadable(new Date(initialTime)));
 		log.info("Sending end Time = [{}]", dateToHumanReadable(new Date()));
+		log.info(targetSpeed.toString());
 		log.info("{} objects sent in {} ", count, millisToTimeHumanReadable(System.currentTimeMillis() - initialTime));
 		reset();
 	}
