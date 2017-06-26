@@ -9,7 +9,7 @@
 		<junit.version>4.12</junit.version>
 		<springframework.version>4.3.7.RELEASE</springframework.version>
 		<activemq.version>5.14.5</activemq.version>
-		<jdk.target.version>1.6</jdk.target.version>
+		<jdk.target.version>1.8</jdk.target.version>
 		<jdk.source.version>1.8</jdk.source.version>
 		<logback.version>1.2.3</logback.version>
 	</properties>
@@ -47,6 +47,15 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>config.properties</exclude>
+					<exclude>logback.xml</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -56,6 +65,20 @@
 					<source>${jdk.source.version}</source>
 					<target>${jdk.target.version}</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
