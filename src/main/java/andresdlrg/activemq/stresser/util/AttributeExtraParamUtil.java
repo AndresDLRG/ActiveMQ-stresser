@@ -2,12 +2,15 @@ package andresdlrg.activemq.stresser.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import andresdlrg.activemq.stresser.exception.InvalidExtraParamException;
+import andresdlrg.activemq.stresser.exception.InvalidValueForMapException;
 import andresdlrg.activemq.stresser.exception.UnsupportedFieldTypeException;
 import andresdlrg.activemq.stresser.model.AttributeMapping;
 import andresdlrg.activemq.stresser.service.ExtraParamService;
@@ -17,6 +20,7 @@ import andresdlrg.activemq.stresser.service.impl.CurrentDateExtraParamServiceImp
 import andresdlrg.activemq.stresser.service.impl.DefineDateFormatExtraParamServiceImpl;
 import andresdlrg.activemq.stresser.service.impl.DirectObjectExtraParamServiceImpl;
 import andresdlrg.activemq.stresser.service.impl.ListExtraParamServiceImpl;
+import andresdlrg.activemq.stresser.service.impl.MapExtraParamServiceImpl;
 import andresdlrg.activemq.stresser.service.impl.NullExtraParamServiceImpl;
 import andresdlrg.activemq.stresser.service.impl.RandomNumberExtraParamServiceImpl;
 import andresdlrg.activemq.stresser.service.impl.RandomStringExtraParamServiceImpl;
@@ -29,11 +33,14 @@ public class AttributeExtraParamUtil {
 	private static final String CONSECUTIVE_NUMBER_REGEX = "consecutiveNumber\\(\\s*\\d+\\s*,\\s*[+-]\\s*\\)";
 	private static final String RANDOM_NUMBER_REGEX = "randomNumber\\(\\s*\\d+\\s*,\\s*\\d+\\s*\\)";
 	private static final String RANDOM_STRING_REGEX = "randomString\\(\\s*\\d+\\s*,\\s*\\d+\\s*\\)";
-	private static final String RANDOM_STRING_LIST_REGEX = "randomStringList\\(.+, .+ (,.+){0,}\\)";
+	private static final String RANDOM_STRING_LIST_REGEX = "randomStringList\\(.+,.+(,.+){0,}\\)";
 	private static final String CURRENT_DATE_REGEX = "currentDate";
 	private static final String DEFINE_DATE_FORMAT_REGEX = "defineDateFormat\\(.+\\)";
 	private static final String ARRAY_REGEX = "array\\(.\\)";
 	private static final String LIST_REGEX = "list\\(.\\)";
+	private static final String MAP_REGEX = "map\\(.+,.+\\)";
+	
+	private static final String MAP_ORIGINAL_VALUE_REGEX = "\\[\\s*\\(.+:.+\\)(\\s*,\\s*\\(.*:.*\\)){0,}\\s*\\]";
 
 	private static final String STRING_TYPE = "string";
 	private static final String BOOLEAN_TYPE = "boolean";
@@ -84,7 +91,11 @@ public class AttributeExtraParamUtil {
 			String simple = extraParamString.substring(extraParamString.indexOf('(') + 1,
 					extraParamString.indexOf(')'));
 			extraParamService = generateListExtraParam(fieldType, originalValue, simple);
+		} else if (extraParamString.matches(MAP_REGEX)) {
+			String[] args = extractArguments(extraParamString);
+			extraParamService = generateMapExtraParam(args[0], args[1], originalValue);
 		}
+		
 		if (extraParamService != null) {
 			log.info("ExtraParamService of class [{}] generated for fieldName [{}]",
 					extraParamService.getClass().getSimpleName(), mapping.getFieldName());
@@ -297,6 +308,31 @@ public class AttributeExtraParamUtil {
 			return new ListExtraParamServiceImpl<Double>(doubles);
 		}
 		throw new UnsupportedFieldTypeException("[" + fieldType + "] fieldType is not supported");
+	}
+	
+	private static MapExtraParamServiceImpl<?, ?> generateMapExtraParam(String keyType, String valueType, String originalValue) {
+		if (!originalValue.matches(MAP_ORIGINAL_VALUE_REGEX)) {
+			throw new InvalidValueForMapException(originalValue + " can not match with regex " + MAP_ORIGINAL_VALUE_REGEX);
+		}
+		String modifiedValue = originalValue.replaceAll("[\\(\\)\\[\\]\\s]", "");
+		String[] mapits = modifiedValue.split(",");
+
+		List<String[]> mapAlls = new ArrayList<String[]>();
+		
+		for(String mapit : mapits) {
+			String[] insidies = mapit.split(":");
+			mapAlls.add(insidies);
+		}
+		
+		if (STRING_TYPE.equalsIgnoreCase(keyType) && STRING_TYPE.equalsIgnoreCase(valueType)) {
+			Map<String, String > mapp = new HashMap<String, String>();
+			for (String[] strings : mapAlls) {
+				mapp.put(strings[0], strings[1]);
+			}
+			return new MapExtraParamServiceImpl<String, String>(mapp);
+		}
+		
+		throw new UnsupportedFieldTypeException("[" + keyType + "] or [" + valueType + "] fieldType is not supported");
 	}
 
 }
