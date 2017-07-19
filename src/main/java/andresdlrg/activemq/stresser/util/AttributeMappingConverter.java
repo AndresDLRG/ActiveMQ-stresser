@@ -15,7 +15,7 @@ public class AttributeMappingConverter {
 
 	public static List<AttributeMapping> stringToAttributesMapping(String attributes) {
 		log.debug("Generating AttributteMappings from String - {}", attributes);
-		List<AttributeMapping> mappings = new ArrayList<>();
+		List<AttributeMapping> mappings = new ArrayList<AttributeMapping>();
 
 		String[] attributeStringarray = attributes.split("@@");
 		for (String attributeString : attributeStringarray) {

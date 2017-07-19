@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jms.core.JmsTemplate;
 
 import andresdlrg.activemq.stresser.exception.InvalidTimePeriod;
 import andresdlrg.activemq.stresser.jms.MessageSender;
@@ -26,18 +27,21 @@ public class ActivemqStresserSender {
 	private LimitConfiguration limits;
 	private DataToSendConfiguration data;
 	private ThroughputConfiguration throughput;
+	
+	private JmsTemplate jmsTemplate;
 
 	private long count = 0;
 	private long initialTime = 0;
 	private long nanosBetweenSent = 0;
-	private static final long NANOS_IN_HOUR = 3_600_000_000_000L;
-	private static final long NANOS_IN_MINUTE = 60_000_000_000L;
-	private static final long NANOS_IN_SECOND = 1_000_000_000L;
-	private static final int NANOS_IN_MILLI = 1_000_000;
+	private static final long NANOS_IN_HOUR = 3600000000000L; // 3_600_000_000_000L
+	private static final long NANOS_IN_MINUTE = 60000000000L; // 60_000_000_000L
+	private static final long NANOS_IN_SECOND = 1000000000L; // 1_000_000_000L
+	private static final int NANOS_IN_MILLI = 1000000; // 1_000_000
 
 	public void startSending() throws Exception {
 		StringBuilder targetSpeed = new StringBuilder();
-		targetSpeed.append("Target speed = ").append(throughput.getTimePeriod());
+		log.info("Destination to write the objects: {}", jmsTemplate.getDefaultDestinationName());
+		targetSpeed.append("Target speed = ").append(throughput.getInstancesPerTimePeriod());
 
 		if ("h".equalsIgnoreCase(throughput.getTimePeriod())) {
 			nanosBetweenSent = NANOS_IN_HOUR / throughput.getInstancesPerTimePeriod();
@@ -83,7 +87,7 @@ public class ActivemqStresserSender {
 
 			messageSender.sendObject((Serializable) object);
 			count++;
-			log.info("Objects sent [{}]", count);
+			log.info("Objects sent [{}/ {}]", count, limits.getMaxObjectsToSend());
 			processedTime = System.nanoTime() - initCreatingTime;
 
 			nanosToSleep = (int) (nanosBetweenSent - processedTime);
@@ -99,7 +103,8 @@ public class ActivemqStresserSender {
 			log.info("Max execution time ({}ms) reached", limits.getMaxExecutionTime());
 		}
 		log.info("Sending start Time = [{}]", dateToHumanReadable(new Date(initialTime)));
-		log.info("Sending end Time = [{}]", dateToHumanReadable(new Date()));
+		long endTime = System.currentTimeMillis();
+		log.info("Sending end Time = [{}]", dateToHumanReadable(new Date(endTime)));
 		log.info(targetSpeed.toString());
 		log.info("{} objects sent in {} ", count, millisToTimeHumanReadable(System.currentTimeMillis() - initialTime));
 		reset();
@@ -115,7 +120,7 @@ public class ActivemqStresserSender {
 		long hours = TimeUnit.MILLISECONDS.toHours(millis);
 		long minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % 60;
 		long seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % 60;
-		long millis2 = millis % 1_000;
+		long millis2 = millis % 1000;
 
 		return String.format("%dh %dm %ds %dms", hours, minutes, seconds, millis2);
 	}
@@ -139,6 +144,10 @@ public class ActivemqStresserSender {
 
 	public void setThroughput(ThroughputConfiguration throughput) {
 		this.throughput = throughput;
+	}
+	
+	public void setJmsTemplate(JmsTemplate jmsTemplate) {
+		this.jmsTemplate = jmsTemplate;
 	}
 
 }

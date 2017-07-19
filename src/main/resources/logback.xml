@@ -11,7 +11,7 @@
 
 	<appender name="FILE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>trace.log</file>
+		<file>../logs/trace.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- hourly rollover -->
 			<fileNamePattern>trace.%d{yyyy-MM-dd-HH}.log</fileNamePattern>
@@ -29,7 +29,7 @@
 
 
 	<root level="info">
-		<appender-ref ref="STDOUT" />
-<!-- 		<appender-ref ref="FILE" /> -->
+<!-- 		<appender-ref ref="STDOUT" /> -->
+		<appender-ref ref="FILE" />
 	</root>
 </configuration>
