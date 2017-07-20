@@ -40,7 +40,7 @@ public class AttributeExtraParamUtil {
 	private static final String LIST_REGEX = "list\\(.\\)";
 	private static final String MAP_REGEX = "map\\(.+,.+\\)";
 	
-	private static final String MAP_ORIGINAL_VALUE_REGEX = "\\[\\s*\\(.+:.+\\)(\\s*,\\s*\\(.*:.*\\)){0,}\\s*\\]";
+	private static final String MAP_ORIGINAL_VALUE_REGEX = ".+:.+(,.+:.+){0,}";
 
 	private static final String STRING_TYPE = "string";
 	private static final String BOOLEAN_TYPE = "boolean";
@@ -314,8 +314,7 @@ public class AttributeExtraParamUtil {
 		if (!originalValue.matches(MAP_ORIGINAL_VALUE_REGEX)) {
 			throw new InvalidValueForMapException(originalValue + " can not match with regex " + MAP_ORIGINAL_VALUE_REGEX);
 		}
-		String modifiedValue = originalValue.replaceAll("[\\(\\)\\[\\]\\s]", "");
-		String[] mapits = modifiedValue.split(",");
+		String[] mapits = originalValue.split(",");
 
 		List<String[]> mapAlls = new ArrayList<String[]>();
 		

@@ -14,7 +14,7 @@ public class ReflectionUtil {
 
 	public static void set(Object object, String fieldName, Object fieldValue) throws ClassNotFoundException,
 			InstantiationException, IllegalAccessException, NoSuchFieldException {
-		log.debug("Setting field [] to value [] using reflection", fieldName, fieldValue);
+		log.debug("Setting field [{}] to value [{}] using reflection", fieldName, fieldValue);
 		Class<?> clazz = object.getClass();
 
 		Field field;
