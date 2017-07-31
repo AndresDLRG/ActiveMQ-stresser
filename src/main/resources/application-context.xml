@@ -10,6 +10,7 @@
 		<property name="location">
 			<value>${configFile}</value>
 		</property>
+		<property name="fileEncoding" value="UTF-8"/>
 	</bean>
 
 	<!-- Configuring JMS -->
@@ -77,7 +78,6 @@
 		<property name="limits" ref="limitConfiguration" />
 		<property name="data" ref="dataToSendConfiguration" />
 		<property name="throughput" ref="throughputConfiguration" />
-		<property name="jmsTemplate" ref="jmsTemplate" />
 	</bean>
 
 </beans>

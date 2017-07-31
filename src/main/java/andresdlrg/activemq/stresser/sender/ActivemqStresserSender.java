@@ -1,6 +1,7 @@
 package andresdlrg.activemq.stresser.sender;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jms.core.JmsTemplate;
 
 import andresdlrg.activemq.stresser.exception.InvalidTimePeriod;
 import andresdlrg.activemq.stresser.jms.MessageSender;
@@ -28,8 +28,6 @@ public class ActivemqStresserSender {
 	private DataToSendConfiguration data;
 	private ThroughputConfiguration throughput;
 	
-	private JmsTemplate jmsTemplate;
-
 	private long count = 0;
 	private long initialTime = 0;
 	private long nanosBetweenSent = 0;
@@ -40,7 +38,7 @@ public class ActivemqStresserSender {
 
 	public void startSending() throws Exception {
 		StringBuilder targetSpeed = new StringBuilder();
-		log.info("Destination to write the objects: {}", jmsTemplate.getDefaultDestinationName());
+		log.info("Destination to write the objects: {}", messageSender.getJmsTemplate().getDefaultDestinationName());
 		targetSpeed.append("Target speed = ").append(throughput.getInstancesPerTimePeriod());
 
 		if ("h".equalsIgnoreCase(throughput.getTimePeriod())) {
@@ -82,7 +80,19 @@ public class ActivemqStresserSender {
 			// Generating the object to send
 			object = classHandle.newInstance();
 			for (AttributeMapping att : mappings) {
-				ReflectionUtil.set(object, att.getFieldName(), att.getExtraParam().getValue());
+				if (!att.getFieldName().contains(".")) {
+					ReflectionUtil.set(object, att.getFieldName(), att.getExtraParam().getValue());
+				} else {
+					String[] fields = att.getFieldName().split("\\.");
+					Object object2 = object;
+					Field field;
+					for (int i = 0; i < fields.length - 1; i++) {
+						object2 = object2.getClass().getField(fields[i]).getType();
+					}
+					field = object2.getClass().getField(fields[fields.length -1]);
+					field.setAccessible(true);
+					field.set(object2, att.getExtraParam().getValue());
+				}
 			}
 
 			messageSender.sendObject((Serializable) object);
@@ -146,8 +156,4 @@ public class ActivemqStresserSender {
 		this.throughput = throughput;
 	}
 	
-	public void setJmsTemplate(JmsTemplate jmsTemplate) {
-		this.jmsTemplate = jmsTemplate;
-	}
-
 }

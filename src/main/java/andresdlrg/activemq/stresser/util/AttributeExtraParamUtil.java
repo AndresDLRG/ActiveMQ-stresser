@@ -1,5 +1,6 @@
 package andresdlrg.activemq.stresser.util;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import andresdlrg.activemq.stresser.exception.InvalidExtraParamException;
 import andresdlrg.activemq.stresser.exception.InvalidValueForMapException;
+import andresdlrg.activemq.stresser.exception.NumberOfArgsMismatchException;
 import andresdlrg.activemq.stresser.exception.UnsupportedFieldTypeException;
 import andresdlrg.activemq.stresser.model.AttributeMapping;
 import andresdlrg.activemq.stresser.service.ExtraParamService;
@@ -30,6 +32,8 @@ public class AttributeExtraParamUtil {
 
 	private static final String NULL_REGEX = "null";
 	private static final String DIRECT_REGEX = "";
+	private static final String CLASS_REGEX = "class\\(\\s*(.+|(.+(,.+){0,}))\\s*\\)";
+	private static final String ENUM_REGEX = "enum";
 	private static final String CONSECUTIVE_NUMBER_REGEX = "consecutiveNumber\\(\\s*\\d+\\s*,\\s*[+-]\\s*\\)";
 	private static final String RANDOM_NUMBER_REGEX = "randomNumber\\(\\s*\\d+\\s*,\\s*\\d+\\s*\\)";
 	private static final String RANDOM_STRING_REGEX = "randomString\\(\\s*\\d+\\s*,\\s*\\d+\\s*\\)";
@@ -39,7 +43,7 @@ public class AttributeExtraParamUtil {
 	private static final String ARRAY_REGEX = "array\\(.\\)";
 	private static final String LIST_REGEX = "list\\(.\\)";
 	private static final String MAP_REGEX = "map\\(.+,.+\\)";
-	
+
 	private static final String MAP_ORIGINAL_VALUE_REGEX = ".+:.+(,.+:.+){0,}";
 
 	private static final String STRING_TYPE = "string";
@@ -94,8 +98,13 @@ public class AttributeExtraParamUtil {
 		} else if (extraParamString.matches(MAP_REGEX)) {
 			String[] args = extractArguments(extraParamString);
 			extraParamService = generateMapExtraParam(args[0], args[1], originalValue);
+		} else if (extraParamString.matches(CLASS_REGEX)) {
+			String[] args = extractArguments(extraParamString);
+			extraParamService = generateCustomClassExtraParam(fieldType, originalValue.split(","), args);
+		} else if (extraParamString.matches(ENUM_REGEX)) {
+			extraParamService = generateEnumExtraParam(fieldType, originalValue);
 		}
-		
+
 		if (extraParamService != null) {
 			log.info("ExtraParamService of class [{}] generated for fieldName [{}]",
 					extraParamService.getClass().getSimpleName(), mapping.getFieldName());
@@ -309,29 +318,96 @@ public class AttributeExtraParamUtil {
 		}
 		throw new UnsupportedFieldTypeException("[" + fieldType + "] fieldType is not supported");
 	}
-	
-	private static MapExtraParamServiceImpl<?, ?> generateMapExtraParam(String keyType, String valueType, String originalValue) {
+
+	private static MapExtraParamServiceImpl<?, ?> generateMapExtraParam(String keyType, String valueType,
+			String originalValue) {
 		if (!originalValue.matches(MAP_ORIGINAL_VALUE_REGEX)) {
-			throw new InvalidValueForMapException(originalValue + " can not match with regex " + MAP_ORIGINAL_VALUE_REGEX);
+			throw new InvalidValueForMapException(
+					originalValue + " can not match with regex " + MAP_ORIGINAL_VALUE_REGEX);
 		}
 		String[] mapits = originalValue.split(",");
 
 		List<String[]> mapAlls = new ArrayList<String[]>();
-		
-		for(String mapit : mapits) {
+
+		for (String mapit : mapits) {
 			String[] insidies = mapit.split(":");
 			mapAlls.add(insidies);
 		}
-		
+
 		if (STRING_TYPE.equalsIgnoreCase(keyType) && STRING_TYPE.equalsIgnoreCase(valueType)) {
-			Map<String, String > mapp = new HashMap<String, String>();
+			Map<String, String> mapp = new HashMap<String, String>();
 			for (String[] strings : mapAlls) {
 				mapp.put(strings[0], strings[1]);
 			}
 			return new MapExtraParamServiceImpl<String, String>(mapp);
 		}
-		
+
 		throw new UnsupportedFieldTypeException("[" + keyType + "] or [" + valueType + "] fieldType is not supported");
+	}
+
+	private static DirectObjectExtraParamServiceImpl<Object> generateCustomClassExtraParam(String fieldType,
+			String[] originalValues, String[] args) {
+		if (originalValues.length != args.length) {
+			throw new NumberOfArgsMismatchException("number of args [" + args.length + "], number of values ["
+					+ originalValues.length + "], same number of args/values is required");
+		}
+		int argsLength = args.length;
+		Class<?>[] argTypes = new Class[argsLength];
+		Object[] argValues = new Object[argsLength];
+
+		for (int i = 0; i < argsLength; i++) {
+			if (STRING_TYPE.equalsIgnoreCase(args[i])) {
+				argTypes[i] = String.class;
+				argValues[i] = originalValues[i];
+			} else if (BOOLEAN_TYPE.equalsIgnoreCase(args[i])) {
+				argTypes[i] = Boolean.class;
+				argValues[i] = Boolean.valueOf(originalValues[i]);
+			} else if (CHARACTER_TYPE.equalsIgnoreCase(args[i]) || CHAR_TYPE.equalsIgnoreCase(args[i])) {
+				argTypes[i] = Character.class;
+				argValues[i] = Character.valueOf(originalValues[i].charAt(0));
+			} else if (BYTE_TYPE.equalsIgnoreCase(args[i])) {
+				argTypes[i] = Byte.class;
+				argValues[i] = Byte.valueOf(originalValues[i]);
+			} else if (SHORT_TYPE.equalsIgnoreCase(args[i])) {
+				argTypes[i] = Short.class;
+				argValues[i] = Short.valueOf(originalValues[i]);
+			} else if (INTEGER_TYPE.equalsIgnoreCase(args[i]) || INT_TYPE.equalsIgnoreCase(args[i])) {
+				argTypes[i] = Integer.class;
+				argValues[i] = Integer.valueOf(originalValues[i]);
+			} else if (LONG_TYPE.equalsIgnoreCase(args[i])) {
+				argTypes[i] = Long.class;
+				argValues[i] = Long.valueOf(originalValues[i]);
+			} else if (FLOAT_TYPE.equalsIgnoreCase(args[i])) {
+				argTypes[i] = Float.class;
+				argValues[i] = Float.valueOf(originalValues[i]);
+			} else if (DOUBLE_TYPE.equalsIgnoreCase(args[i])) {
+				argTypes[i] = Double.class;
+				argValues[i] = Double.valueOf(originalValues[i]);
+			} else {
+				throw new UnsupportedFieldTypeException("[" + args[i] + "] fieldType is not supported");
+			}
+		}
+		try {
+			Class<?> classHandle = Class.forName(fieldType);
+
+			Constructor<?> constructor = classHandle.getConstructor(argTypes);
+			Object obj = constructor.newInstance(argValues);
+			return new DirectObjectExtraParamServiceImpl<Object>(obj);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static DirectObjectExtraParamServiceImpl<Enum<?>> generateEnumExtraParam(String fieldType, String originalValue) {
+		Class<?> classHandle;
+		try {
+			classHandle = Class.forName(fieldType);
+			Enum<?> enumerator =  Enum.valueOf((Class<Enum>) classHandle, originalValue);
+			return new DirectObjectExtraParamServiceImpl<Enum<?>>(enumerator);
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

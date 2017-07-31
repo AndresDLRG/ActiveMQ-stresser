@@ -20,6 +20,8 @@ public class SampleClass implements Serializable {
 	private Integer[] integerArray;
 	private List<String> stringList;
 	private Map<String, String> mapParams;
+	private InsideClass insideClass;
+	private MyEnum someEnum;
 
 	public Long getConsecutive() {
 		return consecutive;
@@ -101,6 +103,22 @@ public class SampleClass implements Serializable {
 		this.mapParams = mapParams;
 	}
 
+	public InsideClass getInsideClass() {
+		return insideClass;
+	}
+
+	public void setInsideClass(InsideClass insideClass) {
+		this.insideClass = insideClass;
+	}
+
+	public MyEnum getSomeEnum() {
+		return someEnum;
+	}
+
+	public void setSomeEnum(MyEnum someEnum) {
+		this.someEnum = someEnum;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -124,6 +142,10 @@ public class SampleClass implements Serializable {
 		builder.append(stringList);
 		builder.append(", mapParams=");
 		builder.append(mapParams);
+		builder.append(", insideClass=");
+		builder.append(insideClass);
+		builder.append(", someEnum=");
+		builder.append(someEnum);
 		builder.append("]");
 		return builder.toString();
 	}
