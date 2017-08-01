@@ -22,6 +22,13 @@ public class SampleClass implements Serializable {
 	private Map<String, String> mapParams;
 	private InsideClass insideClass;
 	private MyEnum someEnum;
+	
+	public SampleClass() {
+	}
+	
+	public SampleClass(String permaString) {
+		this.permaString = permaString;
+	}
 
 	public Long getConsecutive() {
 		return consecutive;

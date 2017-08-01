@@ -1,7 +1,6 @@
 package andresdlrg.activemq.stresser.sender;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -27,7 +26,7 @@ public class ActivemqStresserSender {
 	private LimitConfiguration limits;
 	private DataToSendConfiguration data;
 	private ThroughputConfiguration throughput;
-	
+
 	private long count = 0;
 	private long initialTime = 0;
 	private long nanosBetweenSent = 0;
@@ -54,8 +53,7 @@ public class ActivemqStresserSender {
 			throw new InvalidTimePeriod("timePeriod [" + throughput.getTimePeriod() + "] is not supported");
 		}
 
-		Class<?> classHandle = Class.forName(data.getClassTypeToSend());
-		log.info("The class to send is {}", classHandle.getName());
+		log.info("The class to send is {}", data.getClassTypeToSend());
 		List<AttributeMapping> mappings = AttributeMappingConverter
 				.stringToAttributesMapping(data.getAttributesToWrite());
 		log.info(targetSpeed.toString());
@@ -78,21 +76,11 @@ public class ActivemqStresserSender {
 			initCreatingTime = System.nanoTime();
 
 			// Generating the object to send
-			object = classHandle.newInstance();
+			String[] argTypes = data.getConstructorArgTypes().equals("") ? new String[0] : data.getConstructorArgTypes().split(",");
+			String[] argValues = data.getConstructorArgValues().equals("") ? new String[0] : data.getConstructorArgValues().split(",");
+			object = ReflectionUtil.createInstance(data.getClassTypeToSend(), argTypes, argValues);
 			for (AttributeMapping att : mappings) {
-				if (!att.getFieldName().contains(".")) {
-					ReflectionUtil.set(object, att.getFieldName(), att.getExtraParam().getValue());
-				} else {
-					String[] fields = att.getFieldName().split("\\.");
-					Object object2 = object;
-					Field field;
-					for (int i = 0; i < fields.length - 1; i++) {
-						object2 = object2.getClass().getField(fields[i]).getType();
-					}
-					field = object2.getClass().getField(fields[fields.length -1]);
-					field.setAccessible(true);
-					field.set(object2, att.getExtraParam().getValue());
-				}
+				ReflectionUtil.set(object, att.getFieldName(), att.getExtraParam().getValue());
 			}
 
 			messageSender.sendObject((Serializable) object);
@@ -155,5 +143,5 @@ public class ActivemqStresserSender {
 	public void setThroughput(ThroughputConfiguration throughput) {
 		this.throughput = throughput;
 	}
-	
+
 }

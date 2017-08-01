@@ -59,6 +59,8 @@
 	<bean id="dataToSendConfiguration" class="andresdlrg.activemq.stresser.model.DataToSendConfiguration">
 		<property name="classTypeToSend" value="${class.type.to.send}" />
 		<property name="attributesToWrite" value="${attributes.to.write}" />
+		<property name="constructorArgTypes" value="${constructor.args.types}" />
+		<property name="constructorArgValues" value="${constructor.args.values}" />
 	</bean>
 
 	<bean id="limitConfiguration" class="andresdlrg.activemq.stresser.model.LimitConfiguration">

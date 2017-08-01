@@ -7,14 +7,14 @@ public class InsideClass implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private String insideProperty;
+
 	public InsideClass() {
 	}
 
 	public InsideClass(String insideProperty) {
 		this.insideProperty = insideProperty;
 	}
-
-	private String insideProperty;
 
 	public String getInsideProperty() {
 		return insideProperty;

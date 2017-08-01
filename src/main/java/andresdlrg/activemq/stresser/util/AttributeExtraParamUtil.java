@@ -346,52 +346,9 @@ public class AttributeExtraParamUtil {
 	}
 
 	private static DirectObjectExtraParamServiceImpl<Object> generateCustomClassExtraParam(String fieldType,
-			String[] originalValues, String[] args) {
-		if (originalValues.length != args.length) {
-			throw new NumberOfArgsMismatchException("number of args [" + args.length + "], number of values ["
-					+ originalValues.length + "], same number of args/values is required");
-		}
-		int argsLength = args.length;
-		Class<?>[] argTypes = new Class[argsLength];
-		Object[] argValues = new Object[argsLength];
-
-		for (int i = 0; i < argsLength; i++) {
-			if (STRING_TYPE.equalsIgnoreCase(args[i])) {
-				argTypes[i] = String.class;
-				argValues[i] = originalValues[i];
-			} else if (BOOLEAN_TYPE.equalsIgnoreCase(args[i])) {
-				argTypes[i] = Boolean.class;
-				argValues[i] = Boolean.valueOf(originalValues[i]);
-			} else if (CHARACTER_TYPE.equalsIgnoreCase(args[i]) || CHAR_TYPE.equalsIgnoreCase(args[i])) {
-				argTypes[i] = Character.class;
-				argValues[i] = Character.valueOf(originalValues[i].charAt(0));
-			} else if (BYTE_TYPE.equalsIgnoreCase(args[i])) {
-				argTypes[i] = Byte.class;
-				argValues[i] = Byte.valueOf(originalValues[i]);
-			} else if (SHORT_TYPE.equalsIgnoreCase(args[i])) {
-				argTypes[i] = Short.class;
-				argValues[i] = Short.valueOf(originalValues[i]);
-			} else if (INTEGER_TYPE.equalsIgnoreCase(args[i]) || INT_TYPE.equalsIgnoreCase(args[i])) {
-				argTypes[i] = Integer.class;
-				argValues[i] = Integer.valueOf(originalValues[i]);
-			} else if (LONG_TYPE.equalsIgnoreCase(args[i])) {
-				argTypes[i] = Long.class;
-				argValues[i] = Long.valueOf(originalValues[i]);
-			} else if (FLOAT_TYPE.equalsIgnoreCase(args[i])) {
-				argTypes[i] = Float.class;
-				argValues[i] = Float.valueOf(originalValues[i]);
-			} else if (DOUBLE_TYPE.equalsIgnoreCase(args[i])) {
-				argTypes[i] = Double.class;
-				argValues[i] = Double.valueOf(originalValues[i]);
-			} else {
-				throw new UnsupportedFieldTypeException("[" + args[i] + "] fieldType is not supported");
-			}
-		}
+			String[] originalValues, String[] argsTypes) {
 		try {
-			Class<?> classHandle = Class.forName(fieldType);
-
-			Constructor<?> constructor = classHandle.getConstructor(argTypes);
-			Object obj = constructor.newInstance(argValues);
+			Object obj = ReflectionUtil.createInstance(fieldType, argsTypes, originalValues);
 			return new DirectObjectExtraParamServiceImpl<Object>(obj);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -400,9 +357,8 @@ public class AttributeExtraParamUtil {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static DirectObjectExtraParamServiceImpl<Enum<?>> generateEnumExtraParam(String fieldType, String originalValue) {
-		Class<?> classHandle;
 		try {
-			classHandle = Class.forName(fieldType);
+			Class<?> classHandle = Class.forName(fieldType);
 			Enum<?> enumerator =  Enum.valueOf((Class<Enum>) classHandle, originalValue);
 			return new DirectObjectExtraParamServiceImpl<Enum<?>>(enumerator);
 		} catch (ClassNotFoundException e) {
