@@ -1,6 +1,5 @@
 package andresdlrg.activemq.stresser.util;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import andresdlrg.activemq.stresser.exception.InvalidExtraParamException;
 import andresdlrg.activemq.stresser.exception.InvalidValueForMapException;
-import andresdlrg.activemq.stresser.exception.NumberOfArgsMismatchException;
 import andresdlrg.activemq.stresser.exception.UnsupportedFieldTypeException;
 import andresdlrg.activemq.stresser.model.AttributeMapping;
 import andresdlrg.activemq.stresser.service.ExtraParamService;
@@ -32,10 +30,10 @@ public class AttributeExtraParamUtil {
 
 	private static final String NULL_REGEX = "null";
 	private static final String DIRECT_REGEX = "";
-	private static final String CLASS_REGEX = "class\\(\\s*(.+|(.+(,.+){0,}))\\s*\\)";
+	private static final String CLASS_REGEX = "class\\(\\s*(.*|(.+|(.+(,.+){0,})))\\s*\\)";
 	private static final String ENUM_REGEX = "enum";
-	private static final String CONSECUTIVE_NUMBER_REGEX = "consecutiveNumber\\(\\s*\\d+\\s*,\\s*[+-]\\s*\\)";
-	private static final String RANDOM_NUMBER_REGEX = "randomNumber\\(\\s*\\d+\\s*,\\s*\\d+\\s*\\)";
+	private static final String CONSECUTIVE_NUMBER_REGEX = "consecutiveNumber\\(\\s*\\d+\\s*,\\s*[+-]\\s*(,\\s*(true|false))?\\s*\\)";
+	private static final String RANDOM_NUMBER_REGEX = "randomNumber\\(\\s*\\d+\\s*,\\s*\\d+\\s*(,\\s*(true|false))?\\s*\\)";
 	private static final String RANDOM_STRING_REGEX = "randomString\\(\\s*\\d+\\s*,\\s*\\d+\\s*\\)";
 	private static final String RANDOM_STRING_LIST_REGEX = "randomStringList\\(.+,.+(,.+){0,}\\)";
 	private static final String CURRENT_DATE_REGEX = "currentDate";
@@ -99,8 +97,9 @@ public class AttributeExtraParamUtil {
 			String[] args = extractArguments(extraParamString);
 			extraParamService = generateMapExtraParam(args[0], args[1], originalValue);
 		} else if (extraParamString.matches(CLASS_REGEX)) {
-			String[] args = extractArguments(extraParamString);
-			extraParamService = generateCustomClassExtraParam(fieldType, originalValue.split(","), args);
+			String[] argsTypes = extractArguments(extraParamString);
+			String[] argsValues = originalValue.trim().equals("") ? new String[0] : originalValue.split(",");
+			extraParamService = generateCustomClassExtraParam(fieldType, argsValues, argsTypes);
 		} else if (extraParamString.matches(ENUM_REGEX)) {
 			extraParamService = generateEnumExtraParam(fieldType, originalValue);
 		}
@@ -117,7 +116,7 @@ public class AttributeExtraParamUtil {
 	private static String[] extractArguments(String extraParamString) {
 		String simple = extraParamString.substring(extraParamString.indexOf('(') + 1, extraParamString.indexOf(')'));
 		simple = simple.replaceAll("\\s", "");
-		return simple.split(",");
+		return simple.trim().equals("") ? new String[0] : simple.split(",");
 	}
 
 	private static NullExtraParamServiceImpl generateNullExtraParam() {
@@ -156,33 +155,41 @@ public class AttributeExtraParamUtil {
 		} else {
 			toAdd = -1;
 		}
+		boolean asString = false;
+		if (args.length == 3 && args[2].equals("true")) {
+			asString = true;
+		}
+		
 		if (BYTE_TYPE.equalsIgnoreCase(fieldType)) {
-			return new ConsecutiveNumberExtraParamServiceImpl<Number>(Byte.valueOf(args[0]), toAdd);
+			return new ConsecutiveNumberExtraParamServiceImpl<Number>(Byte.valueOf(args[0]), toAdd, asString);
 		} else if (SHORT_TYPE.equalsIgnoreCase(fieldType)) {
-			return new ConsecutiveNumberExtraParamServiceImpl<Number>(Short.valueOf(args[0]), toAdd);
+			return new ConsecutiveNumberExtraParamServiceImpl<Number>(Short.valueOf(args[0]), toAdd, asString);
 		} else if (INTEGER_TYPE.equalsIgnoreCase(fieldType) || INT_TYPE.equalsIgnoreCase(fieldType)) {
-			return new ConsecutiveNumberExtraParamServiceImpl<Number>(Integer.valueOf(args[0]), toAdd);
+			return new ConsecutiveNumberExtraParamServiceImpl<Number>(Integer.valueOf(args[0]), toAdd, asString);
 		} else if (LONG_TYPE.equalsIgnoreCase(fieldType)) {
-			return new ConsecutiveNumberExtraParamServiceImpl<Number>(Long.valueOf(args[0]), toAdd);
+			return new ConsecutiveNumberExtraParamServiceImpl<Number>(Long.valueOf(args[0]), toAdd, asString);
 		}
 		throw new UnsupportedFieldTypeException("[" + fieldType + "] fieldType is not supported");
 	}
 
 	private static RandomNumberExtraParamServiceImpl<Number> generateRandomNumberExtraParam(String fieldType,
 			String[] args) {
-
+		boolean asString = false;
+		if (args.length == 3 && args[2].equals("true")) {
+			asString = true;
+		}
 		if (BYTE_TYPE.equalsIgnoreCase(fieldType)) {
-			return new RandomNumberExtraParamServiceImpl<Number>(Byte.valueOf(args[0]), Byte.valueOf(args[0]));
+			return new RandomNumberExtraParamServiceImpl<Number>(Byte.valueOf(args[0]), Byte.valueOf(args[1]), asString);
 		} else if (SHORT_TYPE.equalsIgnoreCase(fieldType)) {
-			return new RandomNumberExtraParamServiceImpl<Number>(Short.valueOf(args[0]), Short.valueOf(args[0]));
+			return new RandomNumberExtraParamServiceImpl<Number>(Short.valueOf(args[0]), Short.valueOf(args[1]), asString);
 		} else if (INTEGER_TYPE.equalsIgnoreCase(fieldType) || INT_TYPE.equalsIgnoreCase(fieldType)) {
-			return new RandomNumberExtraParamServiceImpl<Number>(Integer.valueOf(args[0]), Integer.valueOf(args[0]));
+			return new RandomNumberExtraParamServiceImpl<Number>(Integer.valueOf(args[0]), Integer.valueOf(args[1]), asString);
 		} else if (LONG_TYPE.equalsIgnoreCase(fieldType)) {
-			return new RandomNumberExtraParamServiceImpl<Number>(Long.valueOf(args[0]), Long.valueOf(args[0]));
+			return new RandomNumberExtraParamServiceImpl<Number>(Long.valueOf(args[0]), Long.valueOf(args[1]), asString);
 		} else if (FLOAT_TYPE.equalsIgnoreCase(fieldType)) {
-			return new RandomNumberExtraParamServiceImpl<Number>(Float.valueOf(args[0]), Float.valueOf(args[0]));
+			return new RandomNumberExtraParamServiceImpl<Number>(Float.valueOf(args[0]), Float.valueOf(args[1]), asString);
 		} else if (DOUBLE_TYPE.equalsIgnoreCase(fieldType)) {
-			return new RandomNumberExtraParamServiceImpl<Number>(Double.valueOf(args[0]), Double.valueOf(args[0]));
+			return new RandomNumberExtraParamServiceImpl<Number>(Double.valueOf(args[0]), Double.valueOf(args[1]), asString);
 		}
 		throw new UnsupportedFieldTypeException("[" + fieldType + "] fieldType is not supported");
 	}

@@ -5,6 +5,8 @@ REM set JAVA_HOME=
 
 REM You can change configuration file for other 
 set CONFIG_FILE=config.properties
+REM You should change LOG_FILE if using multiple instances of the program at the same time
+set LOG_FILE=trace
 
 set current=%cd%
 pushd ..
@@ -18,10 +20,11 @@ set CLASSPATH=%CLASSPATH%;%ACTIVEMQ_STRESSER_HOME%\user-lib\*
 
 echo **************************************************
 echo * configFile: %CONFIG_FILE%
+echo * logFile: %LOG_FILE%
 echo * classpath: %CLASSPATH%
 echo * JAVA_HOME: %JAVA_HOME%
 echo **************************************************
 echo.
 echo.
 
-java -DconfigFile=%CONFIG_FILE% -cp %CLASSPATH% andresdlrg.activemq.stresser.main.AppLauncher
+java -DconfigFile=%CONFIG_FILE% -DlogFile=%LOG_FILE% -cp %CLASSPATH% andresdlrg.activemq.stresser.main.AppLauncher

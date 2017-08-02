@@ -6,10 +6,12 @@ public class RandomNumberExtraParamServiceImpl<T> implements ExtraParamService {
 
 	private T min;
 	private T max;
+	private boolean asString;
 
-	public RandomNumberExtraParamServiceImpl(T min, T max) {
+	public RandomNumberExtraParamServiceImpl(T min, T max, boolean asString) {
 		this.min = min;
 		this.max = max;
+		this.asString = asString;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -20,17 +22,20 @@ public class RandomNumberExtraParamServiceImpl<T> implements ExtraParamService {
 		Double value = (Math.random() * (maxDouble - minDouble) + minDouble);
 		T result;
 		if (min instanceof Byte && max instanceof Byte) {
-			result = (T)Byte.valueOf((byte)value.longValue());
-		} else if(min instanceof Short && max instanceof Short) {
-			result = (T)Short.valueOf((short)value.longValue());
-		} else if(min instanceof Integer && max instanceof Integer) {
-			result = (T)Integer.valueOf((int)value.longValue());
-		} else if(min instanceof Long && max instanceof Long) {
-			result = (T)Long.valueOf((long)value.longValue());
-		} else if(min instanceof Float && max instanceof Float) {
-			result = (T)(Float)value.floatValue();
+			result = (T) Byte.valueOf((byte) value.longValue());
+		} else if (min instanceof Short && max instanceof Short) {
+			result = (T) Short.valueOf((short) value.longValue());
+		} else if (min instanceof Integer && max instanceof Integer) {
+			result = (T) Integer.valueOf((int) value.longValue());
+		} else if (min instanceof Long && max instanceof Long) {
+			result = (T) Long.valueOf((long) value.longValue());
+		} else if (min instanceof Float && max instanceof Float) {
+			result = (T) (Float) value.floatValue();
 		} else {
-			result = (T)value;
+			result = (T) value;
+		}
+		if (asString) {
+			return String.valueOf(result);
 		}
 
 		return result;

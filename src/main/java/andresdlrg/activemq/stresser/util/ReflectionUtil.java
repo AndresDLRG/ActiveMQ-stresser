@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import andresdlrg.activemq.stresser.exception.NumberOfArgsMismatchException;
 import andresdlrg.activemq.stresser.exception.UnsupportedFieldTypeException;
-import andresdlrg.activemq.stresser.service.impl.DirectObjectExtraParamServiceImpl;
 
 public class ReflectionUtil {
 

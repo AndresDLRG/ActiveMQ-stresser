@@ -3,7 +3,7 @@
 <configuration scan="false" scanPeriod="30 seconds"
 	packagingData="true">
 	
-	<property name="LOG_FILE" value="trace" />
+	<property name="LOG_FILE" value="${logFile:-trace}" />
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
@@ -27,7 +27,7 @@
 	</appender>
 	
 	<logger name="org.springframework" level="warn" />
-	<logger name="org.apache" level="warn" />uik
+	<logger name="org.apache" level="warn" />
 
 
 	<root level="info">

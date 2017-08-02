@@ -12,6 +12,7 @@
 		<jdk.target.version>1.6</jdk.target.version>
 		<jdk.source.version>1.6</jdk.source.version>
 		<logback.version>1.2.3</logback.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencies>
@@ -89,8 +90,9 @@
 					<execution>
 						<phase>install</phase>
 						<configuration>
-							<tasks>
-								<property name="distFolder" value="${project.build.directory}/${project.build.finalName}"/>
+							<target>
+								<property name="distFolder"
+									value="${project.build.directory}/${project.build.finalName}" />
 								<mkdir dir="${distFolder}" />
 								<mkdir dir="${distFolder}/bin" />
 								<mkdir dir="${distFolder}/conf" />
@@ -100,7 +102,7 @@
 								<copy file="src/main/resources/startup.sh" todir="${distFolder}/bin" />
 								<copy file="src/main/resources/config.properties" todir="${distFolder}/conf" />
 								<copy file="src/main/resources/logback.xml" todir="${distFolder}/conf" />
-							</tasks>
+							</target>
 						</configuration>
 						<goals>
 							<goal>run</goal>
