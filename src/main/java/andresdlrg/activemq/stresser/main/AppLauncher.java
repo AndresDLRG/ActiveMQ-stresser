@@ -11,18 +11,29 @@ import andresdlrg.activemq.stresser.sender.ActivemqStresserSender;
 public class AppLauncher {
 	
 	private static Logger log = LoggerFactory.getLogger(AppLauncher.class);
+	
+	private AppLauncher() {
+	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		log.info("ActiveMQ-stresser starting...");
+		
+		String configFile = System.getProperty("configFile", "classpath:config.properties");
+		System.setProperty("configFile", configFile);
 
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml");
 
 		ActivemqStresserSender sender = ctx.getBean("sender", ActivemqStresserSender.class);
 		
-		sender.startSending();
+		try {
+			sender.startSending();
+		} catch (Exception e) {
+			log.error("Error while executing the program", e);
+		}
 		
 		((ConfigurableApplicationContext)ctx).close();
 		log.info("ActiveMQ-stresser closing...");
+		System.exit(1);
 	}
 
 }

@@ -3,8 +3,9 @@ package andresdlrg.activemq.stresser.model;
 public class DataToSendConfiguration {
 
 	private String classTypeToSend;
-	private boolean useSameObjectAlways;
 	private String attributesToWrite;
+	private String constructorArgTypes;
+	private String constructorArgValues;
 
 	public String getClassTypeToSend() {
 		return classTypeToSend;
@@ -14,20 +15,28 @@ public class DataToSendConfiguration {
 		this.classTypeToSend = classTypeToSend;
 	}
 
-	public boolean isUseSameObjectAlways() {
-		return useSameObjectAlways;
-	}
-
-	public void setUseSameObjectAlways(boolean useSameObjectAlways) {
-		this.useSameObjectAlways = useSameObjectAlways;
-	}
-
 	public String getAttributesToWrite() {
 		return attributesToWrite;
 	}
 
 	public void setAttributesToWrite(String attributesToWrite) {
 		this.attributesToWrite = attributesToWrite;
+	}
+
+	public String getConstructorArgTypes() {
+		return constructorArgTypes;
+	}
+
+	public void setConstructorArgTypes(String constructorArgTypes) {
+		this.constructorArgTypes = constructorArgTypes;
+	}
+
+	public String getConstructorArgValues() {
+		return constructorArgValues;
+	}
+
+	public void setConstructorArgValues(String constructorArgValues) {
+		this.constructorArgValues = constructorArgValues;
 	}
 
 }

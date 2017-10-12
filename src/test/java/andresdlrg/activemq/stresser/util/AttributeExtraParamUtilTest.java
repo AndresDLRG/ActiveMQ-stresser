@@ -7,10 +7,13 @@ import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
 import andresdlrg.activemq.stresser.model.AttributeMapping;
+import andresdlrg.activemq.stresser.model.MyEnum;
+import andresdlrg.activemq.stresser.model.SampleClass;
 import andresdlrg.activemq.stresser.service.ExtraParamService;
 import andresdlrg.activemq.stresser.service.impl.ArrayExtraParamServiceImpl;
 import andresdlrg.activemq.stresser.service.impl.ConsecutiveNumberExtraParamServiceImpl;
@@ -18,6 +21,7 @@ import andresdlrg.activemq.stresser.service.impl.CurrentDateExtraParamServiceImp
 import andresdlrg.activemq.stresser.service.impl.DefineDateFormatExtraParamServiceImpl;
 import andresdlrg.activemq.stresser.service.impl.DirectObjectExtraParamServiceImpl;
 import andresdlrg.activemq.stresser.service.impl.ListExtraParamServiceImpl;
+import andresdlrg.activemq.stresser.service.impl.MapExtraParamServiceImpl;
 import andresdlrg.activemq.stresser.service.impl.NullExtraParamServiceImpl;
 import andresdlrg.activemq.stresser.service.impl.RandomNumberExtraParamServiceImpl;
 import andresdlrg.activemq.stresser.service.impl.RandomStringExtraParamServiceImpl;
@@ -86,6 +90,18 @@ public class AttributeExtraParamUtilTest {
 		assertEquals(5, service.getValue());
 		assertEquals(4, service.getValue());
 	}
+	
+	@Test
+	public void consecutiveNumberextraParam3() {
+		// Setting test data
+		AttributeMapping mapping = new AttributeMapping("attribute|int||consecutiveNumber(5,-, true)");
+
+		// test
+		ExtraParamService service = mapping.getExtraParam();
+		assertTrue(service instanceof ConsecutiveNumberExtraParamServiceImpl<?>);
+		assertEquals("5", service.getValue());
+		assertEquals("4", service.getValue());
+	}
 
 	@Test
 	public void randomNumberExtraParam1() {
@@ -121,6 +137,17 @@ public class AttributeExtraParamUtilTest {
 		assertTrue(service instanceof RandomNumberExtraParamServiceImpl);
 		Float value = (Float) service.getValue();
 		assertTrue(value < 16F && value >= 5F);
+	}
+	
+	@Test
+	public void randomNumberExtraParam4() {
+		// Setting test data
+		AttributeMapping mapping = new AttributeMapping("attribute|int||randomNumber(5, 5, true)");
+
+		// test
+		ExtraParamService service = mapping.getExtraParam();
+		assertTrue(service instanceof RandomNumberExtraParamServiceImpl);
+		assertEquals("5", service.getValue());
 	}
 
 	@Test
@@ -225,6 +252,51 @@ public class AttributeExtraParamUtilTest {
 		assertTrue(service instanceof ListExtraParamServiceImpl<?>);
 		assertTrue(service.getValue() instanceof List<?>);
 		assertTrue(((List<Float>) service.getValue()).size() == 3);
+	}
+	
+	@Test
+	public void mapExtraParam1() {
+		// Setting test data
+		AttributeMapping mapping = new AttributeMapping("attribute|map|key1:value1,key2:value2|map(string,string)");
+
+		// test
+		ExtraParamService service = mapping.getExtraParam();
+		assertTrue(service instanceof MapExtraParamServiceImpl<?,?>);
+		assertTrue(service.getValue() instanceof Map<?,?>);
+		assertTrue(((Map<?,?>) service.getValue()).size() == 2);
+	}
+	
+	@Test
+	public void customClassExtraParam1() {
+		// Setting test data
+		AttributeMapping mapping = new AttributeMapping("attribute|andresdlrg.activemq.stresser.model.SampleClass|| class()");
+
+		// test
+		ExtraParamService service = mapping.getExtraParam();
+		assertTrue(service instanceof DirectObjectExtraParamServiceImpl);
+		assertTrue(service.getValue() instanceof SampleClass);
+	}
+	
+	@Test
+	public void customClassExtraParam2() {
+		// Setting test data
+		AttributeMapping mapping = new AttributeMapping("attribute|andresdlrg.activemq.stresser.model.SampleClass|something| class(string)");
+
+		// test
+		ExtraParamService service = mapping.getExtraParam();
+		assertTrue(service instanceof DirectObjectExtraParamServiceImpl);
+		assertTrue(service.getValue() instanceof SampleClass);
+	}
+	
+	@Test
+	public void enumExtraParam1() {
+		// Setting test data
+		AttributeMapping mapping = new AttributeMapping("attribute|andresdlrg.activemq.stresser.model.MyEnum| ENUM1| enum");
+
+		// test
+		ExtraParamService service = mapping.getExtraParam();
+		assertTrue(service instanceof DirectObjectExtraParamServiceImpl);
+		assertTrue(service.getValue() instanceof MyEnum);
 	}
 
 }

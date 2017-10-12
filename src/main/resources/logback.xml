@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xml>
-<configuration scan="true" scanPeriod="30 seconds"
+<configuration scan="false" scanPeriod="30 seconds"
 	packagingData="true">
+	
+	<property name="LOG_FILE" value="${logFile:-trace}" />
 
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
@@ -11,10 +13,10 @@
 
 	<appender name="FILE"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>trace.log</file>
+		<file>../logs/${LOG_FILE}.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- hourly rollover -->
-			<fileNamePattern>trace.%d{yyyy-MM-dd-HH}.log</fileNamePattern>
+			<fileNamePattern>../logs/old/${LOG_FILE}.%d{yyyy-MM-dd-HH}.log</fileNamePattern>
 			<!-- keep 60 days' worth of history capped at 3GB total size -->
 			<maxHistory>60</maxHistory>
 			<totalSizeCap>3GB</totalSizeCap>
@@ -28,8 +30,8 @@
 	<logger name="org.apache" level="warn" />
 
 
-	<root level="debug">
-		<appender-ref ref="STDOUT" />
-<!-- 		<appender-ref ref="FILE" /> -->
+	<root level="info">
+<!-- 		<appender-ref ref="STDOUT" /> -->
+		<appender-ref ref="FILE" />
 	</root>
 </configuration>

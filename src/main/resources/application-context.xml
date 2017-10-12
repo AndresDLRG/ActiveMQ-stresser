@@ -8,8 +8,9 @@
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="location">
-			<value>classpath:config.properties</value>
+			<value>${configFile}</value>
 		</property>
+		<property name="fileEncoding" value="UTF-8"/>
 	</bean>
 
 	<!-- Configuring JMS -->
@@ -30,9 +31,19 @@
 		<property name="useCompression" value="${connection.useCompression}" />
 		<property name="userName" value="${connection.userName}" />
 	</bean>
+	
+	<bean id="pooledJmsonnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+		<property name="connectionFactory" ref="jmsConnectionFactory" />
+		<property name="createConnectionOnStartup" value="${pooled.connection.createConnectionOnStartup}" />
+		<property name="expiryTimeout" value="${pooled.connection.expiryTimeout}" />
+		<property name="idleTimeout" value="${pooled.connection.idleTimeout}" />
+		<property name="maximumActiveSessionPerConnection" value="${pooled.connection.maximumActiveSessionPerConnection}" />
+		<property name="reconnectOnException" value="${pooled.connection.reconnectOnException}" />
+		<property name="useAnonymousProducers" value="${pooled.connection.useAnonymousProducers}" />
+	</bean>
 
 	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-		<property name="connectionFactory" ref="jmsConnectionFactory" />
+		<property name="connectionFactory" ref="pooledJmsonnectionFactory" />
 		<property name="defaultDestinationName" value="${connection.destination}" />
 		<property name="deliveryPersistent" value="${connection.deliveryPersistent}" />
 		<property name="explicitQosEnabled" value="${connection.explicitQosEnabled}" />
@@ -40,15 +51,16 @@
 		<property name="timeToLive" value="${connection.timeToLive}" />
 	</bean>
 
-	<bean id="messageSender" class="andresdlrg.activemq.stresser.jms.MessageSender">
+	<bean id="messageSender" class="andresdlrg.activemq.stresser.jms.MessageSender" init-method="init">
 		<property name="jmsTemplate" ref="jmsTemplate" />
 	</bean>
 
 	<!-- Setting the configuration objects -->
 	<bean id="dataToSendConfiguration" class="andresdlrg.activemq.stresser.model.DataToSendConfiguration">
 		<property name="classTypeToSend" value="${class.type.to.send}" />
-		<property name="useSameObjectAlways" value="${use.same.object.always}" />
 		<property name="attributesToWrite" value="${attributes.to.write}" />
+		<property name="constructorArgTypes" value="${constructor.args.types}" />
+		<property name="constructorArgValues" value="${constructor.args.values}" />
 	</bean>
 
 	<bean id="limitConfiguration" class="andresdlrg.activemq.stresser.model.LimitConfiguration">
@@ -59,6 +71,7 @@
 	<bean id="throughputConfiguration" class="andresdlrg.activemq.stresser.model.ThroughputConfiguration">
 		<property name="timePeriod" value="${time.period}" />
 		<property name="instancesPerTimePeriod" value="${instances.per.time.period}" />
+		<property name="firstDelayMillis" value="${first.delay.millis}" />
 	</bean>
 	
 	<!-- Setting the sender -->

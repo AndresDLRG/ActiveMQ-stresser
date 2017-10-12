@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import andresdlrg.activemq.stresser.exception.InvalidValueForDatePatternException;
 import andresdlrg.activemq.stresser.service.ExtraParamService;
 
 public class DefineDateFormatExtraParamServiceImpl implements ExtraParamService {
@@ -11,9 +12,14 @@ public class DefineDateFormatExtraParamServiceImpl implements ExtraParamService 
 	private SimpleDateFormat sdf;
 	private Date date;
 
-	public DefineDateFormatExtraParamServiceImpl(String pattern, String value) throws ParseException {
+	public DefineDateFormatExtraParamServiceImpl(String pattern, String value) {
 		sdf = new SimpleDateFormat(pattern);
-		date = sdf.parse(value);
+		try {
+			date = sdf.parse(value);
+		} catch (ParseException e) {
+			throw new InvalidValueForDatePatternException("Invalid value[" + value + "] for pattern[" + pattern + "]",
+					e);
+		}
 	}
 
 	@Override

@@ -12,14 +12,10 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
 public class MessageSender {
-	
+
 	private static Logger log = LoggerFactory.getLogger(MessageSender.class);
 
 	private JmsTemplate jmsTemplate;
-
-	public void setJmsTemplate(JmsTemplate jmsTemplate) {
-		this.jmsTemplate = jmsTemplate;
-	}
 
 	public void sendObject(final Serializable object) {
 		jmsTemplate.send(new MessageCreator() {
@@ -29,6 +25,18 @@ public class MessageSender {
 			}
 		});
 		log.debug("Object sent to activeMQ - {}", object);
+	}
+
+	public void init() throws JMSException {
+		jmsTemplate.getConnectionFactory().createConnection().createSession(false, Session.AUTO_ACKNOWLEDGE);
+	}
+
+	public JmsTemplate getJmsTemplate() {
+		return jmsTemplate;
+	}
+
+	public void setJmsTemplate(JmsTemplate jmsTemplate) {
+		this.jmsTemplate = jmsTemplate;
 	}
 
 }
