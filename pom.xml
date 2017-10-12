@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>andresdlrg</groupId>
 	<artifactId>activemq-stresser</artifactId>
-	<version>1.3-BETA</version>
+	<version>1.00.00</version>
 
 	<properties>
 		<junit.version>4.12</junit.version>
