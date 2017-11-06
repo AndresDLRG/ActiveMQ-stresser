@@ -1,16 +1,14 @@
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 
 	<!-- Properties loading -->
-	<bean
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="location">
 			<value>${configFile}</value>
 		</property>
-		<property name="fileEncoding" value="UTF-8"/>
+		<property name="fileEncoding" value="UTF-8" />
 	</bean>
 
 	<!-- Configuring JMS -->
@@ -18,7 +16,7 @@
 		<property name="brokerURL" value="${connection.broker.url}" />
 		<property name="clientID" value="${connection.clientID}" />
 		<property name="copyMessageOnSend" value="${connection.copyMessageOnSend}" />
-		<property name="disableTimeStampsByDefault" value="${connection.disableTimeStampsByDefault}"/>
+		<property name="disableTimeStampsByDefault" value="${connection.disableTimeStampsByDefault}" />
 		<property name="maxThreadPoolSize" value="${connection.maxThreadPoolSize}" />
 		<property name="messagePrioritySupported" value="${connection.messagePrioritySupported}" />
 		<property name="optimizeAcknowledge" value="${connection.optimizeAcknowledge}" />
@@ -26,19 +24,17 @@
 		<property name="producerWindowSize" value="${connection.producerWindowSize}" />
 		<property name="sendTimeout" value="${connection.sendTimeout}" />
 		<property name="statsEnabled" value="${connection.statsEnabled}" />
-		<property name="trustAllPackages" value="${connection.trustAllPackages}"/>
 		<property name="useAsyncSend" value="${connection.useAsyncSend}" />
 		<property name="useCompression" value="${connection.useCompression}" />
 		<property name="userName" value="${connection.userName}" />
 	</bean>
-	
+
 	<bean id="pooledJmsonnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
 		<property name="connectionFactory" ref="jmsConnectionFactory" />
 		<property name="createConnectionOnStartup" value="${pooled.connection.createConnectionOnStartup}" />
 		<property name="expiryTimeout" value="${pooled.connection.expiryTimeout}" />
 		<property name="idleTimeout" value="${pooled.connection.idleTimeout}" />
 		<property name="maximumActiveSessionPerConnection" value="${pooled.connection.maximumActiveSessionPerConnection}" />
-		<property name="reconnectOnException" value="${pooled.connection.reconnectOnException}" />
 		<property name="useAnonymousProducers" value="${pooled.connection.useAnonymousProducers}" />
 	</bean>
 
@@ -73,7 +69,7 @@
 		<property name="instancesPerTimePeriod" value="${instances.per.time.period}" />
 		<property name="firstDelayMillis" value="${first.delay.millis}" />
 	</bean>
-	
+
 	<!-- Setting the sender -->
 	<bean id="sender" class="andresdlrg.activemq.stresser.sender.ActivemqStresserSender">
 		<property name="messageSender" ref="messageSender" />
