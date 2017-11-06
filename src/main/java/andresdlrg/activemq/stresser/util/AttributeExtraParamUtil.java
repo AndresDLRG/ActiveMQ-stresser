@@ -40,7 +40,7 @@ public class AttributeExtraParamUtil {
 	private static final String DEFINE_DATE_FORMAT_REGEX = "defineDateFormat\\(.+\\)";
 	private static final String ARRAY_REGEX = "array\\(.\\)";
 	private static final String LIST_REGEX = "list\\(.\\)";
-	private static final String MAP_REGEX = "map\\(.+,.+\\)";
+	private static final String MAP_REGEX = "map\\(.+,.+(,\\s*(true|false)\\s*,\\s*(true|false))?\\s*\\)";
 
 	private static final String MAP_ORIGINAL_VALUE_REGEX = ".+:.+(,.+:.+){0,}";
 
@@ -95,7 +95,17 @@ public class AttributeExtraParamUtil {
 			extraParamService = generateListExtraParam(fieldType, originalValue, simple);
 		} else if (extraParamString.matches(MAP_REGEX)) {
 			String[] args = extractArguments(extraParamString);
-			extraParamService = generateMapExtraParam(args[0], args[1], originalValue);
+
+			boolean acceptNull = true;
+			boolean trimStrings = true;
+			if (args.length >= 3) {
+				acceptNull = Boolean.valueOf(args[2]);
+			}
+			if (args.length >= 4) {
+				trimStrings = Boolean.valueOf(args[3]);
+			}
+
+			extraParamService = generateMapExtraParam(args[0], args[1], originalValue, acceptNull, trimStrings);
 		} else if (extraParamString.matches(CLASS_REGEX)) {
 			String[] argsTypes = extractArguments(extraParamString);
 			String[] argsValues = originalValue.trim().equals("") ? new String[0] : originalValue.split(",");
@@ -159,7 +169,7 @@ public class AttributeExtraParamUtil {
 		if (args.length == 3 && args[2].equals("true")) {
 			asString = true;
 		}
-		
+
 		if (BYTE_TYPE.equalsIgnoreCase(fieldType)) {
 			return new ConsecutiveNumberExtraParamServiceImpl<Number>(Byte.valueOf(args[0]), toAdd, asString);
 		} else if (SHORT_TYPE.equalsIgnoreCase(fieldType)) {
@@ -179,17 +189,23 @@ public class AttributeExtraParamUtil {
 			asString = true;
 		}
 		if (BYTE_TYPE.equalsIgnoreCase(fieldType)) {
-			return new RandomNumberExtraParamServiceImpl<Number>(Byte.valueOf(args[0]), Byte.valueOf(args[1]), asString);
+			return new RandomNumberExtraParamServiceImpl<Number>(Byte.valueOf(args[0]), Byte.valueOf(args[1]),
+					asString);
 		} else if (SHORT_TYPE.equalsIgnoreCase(fieldType)) {
-			return new RandomNumberExtraParamServiceImpl<Number>(Short.valueOf(args[0]), Short.valueOf(args[1]), asString);
+			return new RandomNumberExtraParamServiceImpl<Number>(Short.valueOf(args[0]), Short.valueOf(args[1]),
+					asString);
 		} else if (INTEGER_TYPE.equalsIgnoreCase(fieldType) || INT_TYPE.equalsIgnoreCase(fieldType)) {
-			return new RandomNumberExtraParamServiceImpl<Number>(Integer.valueOf(args[0]), Integer.valueOf(args[1]), asString);
+			return new RandomNumberExtraParamServiceImpl<Number>(Integer.valueOf(args[0]), Integer.valueOf(args[1]),
+					asString);
 		} else if (LONG_TYPE.equalsIgnoreCase(fieldType)) {
-			return new RandomNumberExtraParamServiceImpl<Number>(Long.valueOf(args[0]), Long.valueOf(args[1]), asString);
+			return new RandomNumberExtraParamServiceImpl<Number>(Long.valueOf(args[0]), Long.valueOf(args[1]),
+					asString);
 		} else if (FLOAT_TYPE.equalsIgnoreCase(fieldType)) {
-			return new RandomNumberExtraParamServiceImpl<Number>(Float.valueOf(args[0]), Float.valueOf(args[1]), asString);
+			return new RandomNumberExtraParamServiceImpl<Number>(Float.valueOf(args[0]), Float.valueOf(args[1]),
+					asString);
 		} else if (DOUBLE_TYPE.equalsIgnoreCase(fieldType)) {
-			return new RandomNumberExtraParamServiceImpl<Number>(Double.valueOf(args[0]), Double.valueOf(args[1]), asString);
+			return new RandomNumberExtraParamServiceImpl<Number>(Double.valueOf(args[0]), Double.valueOf(args[1]),
+					asString);
 		}
 		throw new UnsupportedFieldTypeException("[" + fieldType + "] fieldType is not supported");
 	}
@@ -327,13 +343,12 @@ public class AttributeExtraParamUtil {
 	}
 
 	private static MapExtraParamServiceImpl<?, ?> generateMapExtraParam(String keyType, String valueType,
-			String originalValue) {
+			String originalValue, boolean acceptNull, boolean trimStrings) {
 		if (!originalValue.matches(MAP_ORIGINAL_VALUE_REGEX)) {
 			throw new InvalidValueForMapException(
 					originalValue + " can not match with regex " + MAP_ORIGINAL_VALUE_REGEX);
 		}
 		String[] mapits = originalValue.split(",");
-
 		List<String[]> mapAlls = new ArrayList<String[]>();
 
 		for (String mapit : mapits) {
@@ -344,12 +359,26 @@ public class AttributeExtraParamUtil {
 		if (STRING_TYPE.equalsIgnoreCase(keyType) && STRING_TYPE.equalsIgnoreCase(valueType)) {
 			Map<String, String> mapp = new HashMap<String, String>();
 			for (String[] strings : mapAlls) {
+				if (trimStrings && strings[0] != null) {
+					strings[0] = strings[0].trim();
+				}
+				if (trimStrings && strings[1] != null) {
+					strings[1] = strings[1].trim();
+				}
+				if (acceptNull && strings[0].equalsIgnoreCase(NULL_REGEX)) {
+					strings[0] = null;
+				}
+				if (acceptNull && strings[1].equalsIgnoreCase(NULL_REGEX)) {
+					strings[1] = null;
+				}
 				mapp.put(strings[0], strings[1]);
+
 			}
 			return new MapExtraParamServiceImpl<String, String>(mapp);
 		}
 
 		throw new UnsupportedFieldTypeException("[" + keyType + "] or [" + valueType + "] fieldType is not supported");
+
 	}
 
 	private static DirectObjectExtraParamServiceImpl<Object> generateCustomClassExtraParam(String fieldType,
@@ -363,10 +392,11 @@ public class AttributeExtraParamUtil {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static DirectObjectExtraParamServiceImpl<Enum<?>> generateEnumExtraParam(String fieldType, String originalValue) {
+	private static DirectObjectExtraParamServiceImpl<Enum<?>> generateEnumExtraParam(String fieldType,
+			String originalValue) {
 		try {
 			Class<?> classHandle = Class.forName(fieldType);
-			Enum<?> enumerator =  Enum.valueOf((Class<Enum>) classHandle, originalValue);
+			Enum<?> enumerator = Enum.valueOf((Class<Enum>) classHandle, originalValue);
 			return new DirectObjectExtraParamServiceImpl<Enum<?>>(enumerator);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
