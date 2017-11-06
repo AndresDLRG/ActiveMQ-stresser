@@ -90,7 +90,7 @@ public class AttributeExtraParamUtilTest {
 		assertEquals(5, service.getValue());
 		assertEquals(4, service.getValue());
 	}
-	
+
 	@Test
 	public void consecutiveNumberextraParam3() {
 		// Setting test data
@@ -138,7 +138,7 @@ public class AttributeExtraParamUtilTest {
 		Float value = (Float) service.getValue();
 		assertTrue(value < 16F && value >= 5F);
 	}
-	
+
 	@Test
 	public void randomNumberExtraParam4() {
 		// Setting test data
@@ -253,7 +253,7 @@ public class AttributeExtraParamUtilTest {
 		assertTrue(service.getValue() instanceof List<?>);
 		assertTrue(((List<Float>) service.getValue()).size() == 3);
 	}
-	
+
 	@Test
 	public void mapExtraParam1() {
 		// Setting test data
@@ -261,37 +261,82 @@ public class AttributeExtraParamUtilTest {
 
 		// test
 		ExtraParamService service = mapping.getExtraParam();
-		assertTrue(service instanceof MapExtraParamServiceImpl<?,?>);
-		assertTrue(service.getValue() instanceof Map<?,?>);
-		assertTrue(((Map<?,?>) service.getValue()).size() == 2);
+		assertTrue(service instanceof MapExtraParamServiceImpl<?, ?>);
+		assertTrue(service.getValue() instanceof Map<?, ?>);
+		assertTrue(((Map<?, ?>) service.getValue()).size() == 2);
+	}
+
+	@Test
+	public void mapExtraParam2() {
+		// Setting test data
+		AttributeMapping mapping = new AttributeMapping("attribute|map|key1:null,null:value2|map(string,string)");
+
+		// test
+		ExtraParamService service = mapping.getExtraParam();
+		assertTrue(service instanceof MapExtraParamServiceImpl<?, ?>);
+		assertTrue(service.getValue() instanceof Map<?, ?>);
+		assertTrue(((Map<?, ?>) service.getValue()).size() == 2);
+		assertTrue(((Map<?, ?>) service.getValue()).get(null).equals("value2"));
+		assertTrue(((Map<?, ?>) service.getValue()).get("key1") == null);
 	}
 	
+	@Test
+	public void mapExtraParam3() {
+		// Setting test data
+		AttributeMapping mapping = new AttributeMapping("attribute|map|key1:null,null:value2|map(string,string,false)");
+
+		// test
+		ExtraParamService service = mapping.getExtraParam();
+		assertTrue(service instanceof MapExtraParamServiceImpl<?, ?>);
+		assertTrue(service.getValue() instanceof Map<?, ?>);
+		assertTrue(((Map<?, ?>) service.getValue()).size() == 2);
+		assertTrue(((Map<?, ?>) service.getValue()).get("null").equals("value2"));
+		assertTrue(((Map<?, ?>) service.getValue()).get("key1").equals("null"));
+	}
+	
+	@Test
+	public void mapExtraParam4() {
+		// Setting test data
+		AttributeMapping mapping = new AttributeMapping("attribute|map|  key1  :  null  ,  null  :  value2  |map(string,string)");
+
+		// test
+		ExtraParamService service = mapping.getExtraParam();
+		assertTrue(service instanceof MapExtraParamServiceImpl<?, ?>);
+		assertTrue(service.getValue() instanceof Map<?, ?>);
+		assertTrue(((Map<?, ?>) service.getValue()).size() == 2);
+		assertTrue(((Map<?, ?>) service.getValue()).get(null).equals("value2"));
+		assertTrue(((Map<?, ?>) service.getValue()).get("key1") == null);
+	}
+
 	@Test
 	public void customClassExtraParam1() {
 		// Setting test data
-		AttributeMapping mapping = new AttributeMapping("attribute|andresdlrg.activemq.stresser.model.SampleClass|| class()");
+		AttributeMapping mapping = new AttributeMapping(
+				"attribute|andresdlrg.activemq.stresser.model.SampleClass|| class()");
 
 		// test
 		ExtraParamService service = mapping.getExtraParam();
 		assertTrue(service instanceof DirectObjectExtraParamServiceImpl);
 		assertTrue(service.getValue() instanceof SampleClass);
 	}
-	
+
 	@Test
 	public void customClassExtraParam2() {
 		// Setting test data
-		AttributeMapping mapping = new AttributeMapping("attribute|andresdlrg.activemq.stresser.model.SampleClass|something| class(string)");
+		AttributeMapping mapping = new AttributeMapping(
+				"attribute|andresdlrg.activemq.stresser.model.SampleClass|something| class(string)");
 
 		// test
 		ExtraParamService service = mapping.getExtraParam();
 		assertTrue(service instanceof DirectObjectExtraParamServiceImpl);
 		assertTrue(service.getValue() instanceof SampleClass);
 	}
-	
+
 	@Test
 	public void enumExtraParam1() {
 		// Setting test data
-		AttributeMapping mapping = new AttributeMapping("attribute|andresdlrg.activemq.stresser.model.MyEnum| ENUM1| enum");
+		AttributeMapping mapping = new AttributeMapping(
+				"attribute|andresdlrg.activemq.stresser.model.MyEnum| ENUM1| enum");
 
 		// test
 		ExtraParamService service = mapping.getExtraParam();
